@@ -4,8 +4,8 @@
     "title": "建华",
     "display": "hidden"
   },
-  "react": {
-    "title": "react笔记",
+  "summary": {
+    "title": "业务功能总结",
     "type": "page"
   }
 }
