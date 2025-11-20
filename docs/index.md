@@ -5,50 +5,21 @@ nav:
   order: 0
 ---
 
-<!-- 自定义首页：顶部纯视频 Banner + 正常内容 -->
 <div class="custom-welcome">
-
-  <!-- 纯视频头部（仅装饰，不叠加文字） -->
-  <div class="video-banner">
-    <video class="banner-video" autoplay muted loop playsinline>
-      <source src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*uYT7SZwhJnUAAAAAAAAAAAAADgCCAQ" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  </div>
-
-  <!-- 正常内容区域：Logo + 标题 + 按钮 + 特性 -->
   <div class="content-section">
     <div class="welcome-container">
       <div class="welcome-logo">
         <img src="https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png" alt="logo" />
       </div>
-      <div class="welcome-title">react-antd-xform</div>
-      <p class="desc">基于 React + Ant Design 的表单解决方案</p>
+      <div class="welcome-title">欢迎来到建华的blog</div>
+      <p class="desc">日常学习 & 分享 | 持续更新</p>
       <div class="welcome-buttons">
-        <a href="/introduction" class="button primary">快速开始</a>
-        <a href="https://github.com/JHuaZhang/react-antd-xform" target="_blank" class="button outline">GitHub</a>
+        <a href="/introduction" class="button primary">开始逛逛</a>
+        <a href="https://github.com/JHuaZhang/zjh-blog" target="_blank" class="button outline">GitHub</a>
       </div>
     </div>
   </div>
-
-  <!-- 特性介绍 -->
-  <div class="features-section">
-    <div class="features-container">
-      <div class="feature">
-        <h3>🚀 开箱即用</h3>
-        <p>集成 Ant Design，无需复杂配置即可使用。</p>
-      </div>
-      <div class="feature">
-        <h3>📊 JSON Schema</h3>
-        <p>支持动态表单结构定义，轻松实现配置化开发。</p>
-      </div>
-      <div class="feature">
-        <h3>🔧 高度可扩展</h3>
-        <p>支持自定义控件、校验规则和插件体系。</p>
-      </div>
-    </div>
   </div>
-
 </div>
 
 <style>
@@ -68,7 +39,7 @@ nav:
   .banner-video {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 填满容器，裁剪多余 */
+    object-fit: cover;
     display: block;
   }
   .content-section {
@@ -163,7 +134,6 @@ nav:
     line-height: 1.6;
   }
 
-  /* =============== 移动端适配 =============== */
   @media (max-width: 768px) {
     .content-section h1 {
       font-size: 2rem;
