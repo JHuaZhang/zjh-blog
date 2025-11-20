@@ -1,25 +1,22 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
+    "target": "ES2015",
+    "module": "ES2015",
     "moduleResolution": "node",
-    "jsx": "preserve",
-    "module": "esnext",
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "declaration": true,
+    "lib": ["es2017", "dom"],
+    "skipLibCheck": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
     "resolveJsonModule": true,
-    "paths": {
-      "@components/*": ["components/*"],
-      "@common/*": ["common/*"],
-    }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "dist", // 排除输出目录
+    "**/__tests__/**",
+    "**/*.stories.tsx"
+  ]
 }
