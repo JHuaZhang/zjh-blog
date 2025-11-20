@@ -1,63 +1,24 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-node_modules
-.pnp
-.pnp.js
-
-# testing
-coverage
-/.nyc_output
-
-# next.js
-.next/
-out/
-build
-dist
-
-# misc
+.idea/
+node_modules/
+node-debug.log
+npm-debug.log
 .DS_Store
-*.pem
-
-# logs
-logs
+**/*.swp
+**/*.swo
+coverage/
+.happypack/
+.vscode
+.history
+/build
+/dist
+/storybook-static
+.dumi
+.justconf/
+/test/coverage
+/node_modules
+/lib
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-lerna-debug.log*
+/dist
 
-# local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# turbo
-.turbo
-
-# lint
-.eslintcache
-
-# Tests
-/coverage
-
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-cache
-.env
+# Ignore Vite temporary config timestamp files
+*.timestamp-*.mjs
