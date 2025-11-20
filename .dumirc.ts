@@ -6,28 +6,23 @@ const isDev = process.env.NODE_ENV === 'development' || process.env.DUMI_ENV ===
 
 export default defineConfig({
   favicons: ['https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png'],
-  // 输出目录
   outputPath: 'dist',
   history: {
     type: 'browser',
   },
-  // 站点的基础路径，如果你的站点要部署在非根路径下，需要修改此选项，例如 '/my-project/'
   base: isDev ? '/' : '/zjh-blog/',
-  // 设置公共路径，通常用于指定静态资源的基础路径
   publicPath: isDev ? '/' : '/zjh-blog/',
-  // 主题配置是 dumi-theme-antd的核心配置区域
   title: 'zjh-blog',
   themeConfig: defineThemeConfig({
-    name: 'zjh-blog',
-    title: '建华',
+    name: '建华的blog',
+    title: '建华的blog',
     logo: 'https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png',
-    description: 'blog',
+    description: '',
     socialLinks: {
       github: 'https://github.com/JHuaZhang/zjh-blog',
     },
     footer: 'Copyright © 2025 zjh',
   }),
-  // 如果需要对默认主题的样式进行细微调整，可以使用 styles 配置项注入全局样式
   styles: [
     `.dumi-default-header-left {
       width: 280px !important;
