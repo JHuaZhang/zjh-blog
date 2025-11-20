@@ -19,11 +19,11 @@ export default defineConfig({
   title: 'zjh-blog',
   themeConfig: defineThemeConfig({
     name: 'zjh-blog',
-    title: 'zjh-blog',
+    title: '建华',
     logo: 'https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png',
-    description: '基于 React + Ant Design 的表单解决方案',
+    description: 'blog',
     socialLinks: {
-      github: 'https://github.com/JHuaZhang/react-antd-xform',
+      github: 'https://github.com/JHuaZhang/zjh-blog',
     },
     footer: 'Copyright © 2025 zjh',
   }),
