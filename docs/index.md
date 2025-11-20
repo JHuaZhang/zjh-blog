@@ -11,7 +11,7 @@ nav:
       <div class="welcome-logo">
         <img src="https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png" alt="logo" />
       </div>
-      <div class="welcome-title">欢迎来到建华的blog</div>
+      <div class="welcome-title">欢迎来到建华blog</div>
       <p class="desc">日常学习 & 分享 | 持续更新</p>
       <div class="welcome-buttons">
         <a href="/introduction" class="button primary">开始逛逛</a>
