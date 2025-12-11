@@ -5,7 +5,7 @@ import { defineThemeConfig } from 'dumi-theme-antd/dist/defineThemeConfig';
 const isDev = process.env.NODE_ENV === 'development' || process.env.DUMI_ENV === 'devbuild';
 
 export default defineConfig({
-  favicons: ['https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png'],
+  favicons: ['/assets/logo.ico'],
   outputPath: 'dist',
   history: {
     type: 'browser',
@@ -16,7 +16,7 @@ export default defineConfig({
   themeConfig: defineThemeConfig({
     name: '建华的blog',
     title: '建华的blog',
-    logo: 'https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png',
+    logo: '/assets/logo.png',
     description: '',
     socialLinks: {
       github: 'https://github.com/JHuaZhang/zjh-blog',
