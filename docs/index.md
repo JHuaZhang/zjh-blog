@@ -9,12 +9,12 @@ nav:
   <div class="content-section">
     <div class="welcome-container">
       <div class="welcome-logo">
-        <img src="https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png" alt="logo" />
+        <img src="/assets/logo.png" alt="logo" />
       </div>
       <div class="welcome-title">欢迎来到建华blog</div>
       <p class="desc">日常学习 & 分享 | 持续更新</p>
       <div class="welcome-buttons">
-        <a href="/introduction" class="button primary">开始逛逛</a>
+        <a href="/docker/01-introduction" class="button primary">开始逛逛</a>
         <a href="https://github.com/JHuaZhang/zjh-blog" target="_blank" class="button outline">GitHub</a>
       </div>
     </div>
