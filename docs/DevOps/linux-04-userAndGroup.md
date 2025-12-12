@@ -1,9 +1,12 @@
 ---
-title: 用户和组的概念
-order: 4
-nav:
+group:
   title: Linux
-  order: 2
+order: 4
+title: 用户和组的概念
+
+nav:
+  title: DevOps
+  order: 1
 ---
 
 在Linux系统中，用户（User）和组（Group）是权限管理的核心概念。它们通过控制对文件、目录和系统资源的访问权限，实现多用户环境下的安全隔离和协作。

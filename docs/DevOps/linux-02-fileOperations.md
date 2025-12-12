@@ -1,9 +1,12 @@
 ---
-title: 文件操作相关命令
-order: 2
-nav:
+group:
   title: Linux
-  order: 2
+order: 2
+title: 文件操作相关命令
+
+nav:
+  title: DevOps
+  order: 1
 ---
 
 

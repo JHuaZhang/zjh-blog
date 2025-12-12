@@ -1,9 +1,12 @@
 ---
-title: 文件查找相关命令
-order: 3
-nav:
+group:
   title: Linux
-  order: 2
+order: 3
+title: 文件查找相关命令
+
+nav:
+  title: DevOps
+  order: 1
 ---
 
 
