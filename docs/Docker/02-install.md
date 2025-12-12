@@ -10,7 +10,7 @@ nav:
 Docker的安装方法因操作系统而异。以下是主流操作系统（Linux、Windows、macOS）上安装 Docker 的详细指南。
 
 ### 1.1、在Linux上安装Docker（以Ubuntu为例）
-官方推荐使用Docker Engine（社区版，即Docker CE）。有关自己学习服务器Alibaba Cloud Linux 3.2104 LTS 64位安装Docker的方法，可以参考Alibaba Cloud Linux服务器软件配置文档。
+官方推荐使用Docker Engine（社区版，即Docker CE）。
 
 **步骤 1：卸载旧版本（如有）**
 
@@ -166,7 +166,7 @@ IMAGE             ID             DISK USAGE   CONTENT SIZE   EXTRA
 nginx:1.29-perl   8a12ca7fe296        319MB         74.6MB  
 ```
 
-## 阿里云服务器安装Docker
+## 3、阿里云服务器安装Docker
 
 **步骤 1：卸载旧版本（如有）**
 
