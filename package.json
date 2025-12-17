@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "dumi dev",
     "docs:build-site": "dumi build",
-    "docs:build": "cross-env DUMI_ENV=devbuild dumi build",
+    "build": "cross-env DUMI_ENV=devbuild dumi build",
     "predeploy": "npm run docs:build-site",
     "deploy": "gh-pages -d dist -b gh-pages"
   },

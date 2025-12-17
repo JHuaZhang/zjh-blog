@@ -9,7 +9,7 @@ nav:
   <div class="content-section">
     <div class="welcome-container">
       <div class="welcome-logo">
-        <img src="../public/assets/logo.png" alt="logo" />
+        <img src="../public/logo.png" alt="logo" />
       </div>
       <div class="welcome-title">欢迎来到建华blog</div>
       <p class="desc">日常学习 & 分享 | 持续更新</p>
