@@ -314,4 +314,4 @@ sudo systemctl daemon-reexec
 sudo systemctl restart docker
 ```
 
-![示例图片](/docs/images/docker/docker202512081358.png)
+![示例图片](../images/docker/docker202512081358.png)
