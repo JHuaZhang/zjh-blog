@@ -9,7 +9,8 @@ nav:
   order: 1
 ---
 
-## 1、docker commit命令介绍
+## 1、docker commit 命令介绍
+
 docker commit 是 Docker 中的一个命令，用于将一个正在运行（或已停止）的容器的当前状态保存为一个新的镜像（image）。这个操作类似于对容器进行“快照”，把容器文件系统的当前状态打包成一个可复用的镜像。
 
 **基本语法：**
@@ -18,18 +19,17 @@ docker commit 是 Docker 中的一个命令，用于将一个正在运行（或�
 docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
 ```
 
-+ CONTAINER：要提交的容器名称或 ID。
-+ REPOSITORY[:TAG]：新镜像的名称和可选标签（如 my-image:v1）。
+- CONTAINER：要提交的容器名称或 ID。
+- REPOSITORY[:TAG]：新镜像的名称和可选标签（如 my-image:v1）。
 
 **常用选项（OPTIONS）：**
 
-| 选项 | 说明 |
-| --- | --- |
-| -a, --author | 指定镜像作者（如"Your Name <email@example.com>"） |
-| -m, --message | 提交时的说明信息（类似 Git 的 commit message） |
-| -p, --pause | 在提交过程中暂停容器（默认为 true） |
-| --change | 应用 Dockerfile 指令到新镜像（如CMD, EXPOSE, ENV等） |
-
+| 选项          | 说明                                                   |
+| ------------- | ------------------------------------------------------ |
+| -a, --author  | 指定镜像作者（如"Your Name <email@example.com>"）      |
+| -m, --message | 提交时的说明信息（类似 Git 的 commit message）         |
+| -p, --pause   | 在提交过程中暂停容器（默认为 true）                    |
+| --change      | 应用 Dockerfile 指令到新镜像（如 CMD, EXPOSE, ENV 等） |
 
 **使用示例：**
 
@@ -69,56 +69,56 @@ docker commit \
 
 1. 不推荐作为常规构建方式：虽然 docker commit 很方便，但它绕过了 Dockerfile，不利于版本控制、可重复构建和团队协作。官方推荐使用 Dockerfile + docker build 来创建镜像。
 2. 仅保存文件系统变更：docker commit 只保存容器的文件系统状态，不会保存：
-    1. 容器的运行时状态（如内存中的数据）。
-    2. 卷（volumes）中的内容。
-    3. 网络配置等运行时元数据（除非通过 --change 显式指定）。
+   1. 容器的运行时状态（如内存中的数据）。
+   2. 卷（volumes）中的内容。
+   3. 网络配置等运行时元数据（除非通过 --change 显式指定）。
 3. 镜像体积可能较大：因为它是基于整个容器文件系统的快照，可能包含不必要的临时文件，导致镜像臃肿。
 
 **适用场景：**
 
-+ 快速调试：在容器中手动修改后想快速保存状态。
-+ 救急恢复：当容器配置正确但没有 Dockerfile 时，临时保存为镜像。
-+ 教学演示：展示容器与镜像的关系。
+- 快速调试：在容器中手动修改后想快速保存状态。
+- 救急恢复：当容器配置正确但没有 Dockerfile 时，临时保存为镜像。
+- 教学演示：展示容器与镜像的关系。
 
 **举例介绍：**
 
 ```bash
-zhangjianhua@U-QCX2V1Y9-0238 ~ % docker pull ubuntu         
+zhangjianhua@U-QCX2V1Y9-0238 ~ % docker pull ubuntu
 Using default tag: latest
 latest: Pulling from library/ubuntu
-97dd3f0ce510: Pull complete 
-588d79ce2edd: Download complete 
+97dd3f0ce510: Pull complete
+588d79ce2edd: Download complete
 Digest: sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9e54
 Status: Downloaded newer image for ubuntu:latest
 docker.io/library/ubuntu:latest
-zhangjianhua@U-QCX2V1Y9-0238 ~ % docker images                               
+zhangjianhua@U-QCX2V1Y9-0238 ~ % docker images
 IMAGE           ID             DISK USAGE   CONTENT SIZE   EXTRA
-nginx:latest    553f64aecdc3        247MB         61.1MB    U   
-ubuntu:latest   c35e29c94501        141MB         30.8MB        
+nginx:latest    553f64aecdc3        247MB         61.1MB    U
+ubuntu:latest   c35e29c94501        141MB         30.8MB
 zhangjianhua@U-QCX2V1Y9-0238 ~ % docker run -it ubuntu /bin/bash
-root@780b53cf0b80:/# ls 
+root@780b53cf0b80:/# ls
 bin  boot  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
 root@780b53cf0b80:/# touch 1.txt
-root@780b53cf0b80:/# vim 1.txt 
+root@780b53cf0b80:/# vim 1.txt
 bash: vim: command not found
 ```
 
-如上，当我们访问拉下来的ubuntu镜像，使用vim的时候会发现vim不存在，这个时候我们可以进行安装vim：
+如上，当我们访问拉下来的 ubuntu 镜像，使用 vim 的时候会发现 vim 不存在，这个时候我们可以进行安装 vim：
 
 ```bash
 apt update
 apt install -y vim
 ```
 
-	然后这个时候就可以有vim了：
+    然后这个时候就可以有vim了：
 
 ```bash
 root@780b53cf0b80:/# ls
 1.txt  bin  boot  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
-root@780b53cf0b80:/# vim 1.txt 
+root@780b53cf0b80:/# vim 1.txt
 ```
 
-这个时候我们新启一个终端，输入docker commit相关内容：
+这个时候我们新启一个终端，输入 docker commit 相关内容：
 
 ```bash
 docker commit -m"提交信息的描述" -a="作者" 容器ID 要创建的镜像名称:[标签名]
@@ -141,15 +141,16 @@ sha256:2837239da35f89ca8a9cd11937d16bb830ae0f0337d0688bbd0ef73f101db6cb
 ```bash
 zhangjianhua@U-QCX2V1Y9-0238 zjh % docker images
 IMAGE           ID             DISK USAGE   CONTENT SIZE   EXTRA
-nginx:latest    553f64aecdc3        247MB         61.1MB    U   
-ubuntu:latest   c35e29c94501        141MB         30.8MB    U   
-ubuntu:vim      2837239da35f        348MB         94.1MB   
+nginx:latest    553f64aecdc3        247MB         61.1MB    U
+ubuntu:latest   c35e29c94501        141MB         30.8MB    U
+ubuntu:vim      2837239da35f        348MB         94.1MB
 ```
 
-可以看到我们的ubuntu:vim的体积变成了94.1MB。
+可以看到我们的 ubuntu:vim 的体积变成了 94.1MB。
 
 ## 2、将本地镜像发布到阿里云
-阿里云ESC Docker生态如下：
+
+阿里云 ESC Docker 生态如下：
 
 ![](../images/docker/docker202512241525.png)
 
@@ -159,11 +160,9 @@ ubuntu:vim      2837239da35f        348MB         94.1MB
 
 ![](../images/docker/docker202512241526.png)
 
-然后创建命名空间（类似 Java 中的包名，这里取名为zjh_test_docker）：
+然后创建命名空间（类似 Java 中的包名，这里取名为 zjh_test_docker）：
 
 ![](../images/docker/docker202512241527.png)
-
-
 
 然后继续创建仓库：
 
@@ -181,19 +180,19 @@ ubuntu:vim      2837239da35f        348MB         94.1MB
 docker login --username=xxx xxx-beijing.personal.cr.aliyuncs.com
 zhangjianhua@U-QCX2V1Y9-0238 zjh % docker images
 IMAGE           ID             DISK USAGE   CONTENT SIZE   EXTRA
-nginx:latest    553f64aecdc3        247MB         61.1MB    U   
-ubuntu:latest   c35e29c94501        141MB         30.8MB    U   
-ubuntu:vim      2837239da35f        348MB         94.1MB  
+nginx:latest    553f64aecdc3        247MB         61.1MB    U
+ubuntu:latest   c35e29c94501        141MB         30.8MB    U
+ubuntu:vim      2837239da35f        348MB         94.1MB
 zhangjianhua@U-QCX2V1Y9-0238 zjh % docker tag 2837239da35f xxx-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim
 zhangjianhua@U-QCX2V1Y9-0238 zjh % docker push xxx-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim
 Using default tag: latest
 The push refers to repository [xxx-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim]
-97dd3f0ce510: Pushed 
-fba38d820e55: Pushed 
+97dd3f0ce510: Pushed
+fba38d820e55: Pushed
 latest: digest: sha256:2837239da35f89ca8a9cd11937d16bb830ae0f0337d0688bbd0ef73f101db6cb size: 751
 ```
 
-	这样我们就把镜像上传到了阿里云中，接着我们可以进行下载，这里可以先把本地的镜像给删除掉，然后拉取阿里云的镜像，这里因为我们登录过了，就不用再继续登录了，直接使用：
+这样我们就把镜像上传到了阿里云中，接着我们可以进行下载，这里可以先把本地的镜像给删除掉，然后拉取阿里云的镜像，这里因为我们登录过了，就不用再继续登录了，直接使用：
 
 ```bash
 docker pull xxx.cn-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim
@@ -201,26 +200,24 @@ docker pull xxx.cn-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim
 
 ```bash
 zhangjianhua@U-QCX2V1Y9-0238 zjh % docker images
-                                                                            
+
 IMAGE                                                                                         ID             DISK USAGE   CONTENT SIZE   EXTRA
-xxx-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim:latest   2837239da35f        348MB         94.1MB        
-nginx:latest                                                                                  553f64aecdc3        247MB         61.1MB    U   
-ubuntu:latest                                                                                 c35e29c94501        141MB         30.8MB        
-zhangjianhua@U-QCX2V1Y9-0238 zjh % 
+xxx-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim:latest                        2837239da35f        348MB         94.1MB
+nginx:latest                                                                                  553f64aecdc3        247MB         61.1MB    U
+ubuntu:latest                                                                                 c35e29c94501        141MB         30.8MB
+zhangjianhua@U-QCX2V1Y9-0238 zjh %
 ```
 
-可以看到这里的名称会是我们远程地址的这种tag，然后为了方便我们查看，可以通过打tag的方式：
+可以看到这里的名称会是我们远程地址的这种 tag，然后为了方便我们查看，可以通过打 tag 的方式：
 
 ```bash
 zhangjianhua@U-QCX2V1Y9-0238 zjh % docker tag xxx.cn-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim:latest my-ubuntu-vim:latest
 zhangjianhua@U-QCX2V1Y9-0238 zjh % docker images
 IMAGE                                                                                         ID             DISK USAGE   CONTENT SIZE   EXTRA
-xxx.cn-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim:latest   2837239da35f        348MB         94.1MB        
-my-ubuntu-vim:latest                                                                          2837239da35f        348MB         94.1MB        
-nginx:latest                                                                                  553f64aecdc3        247MB         61.1MB    U   
-ubuntu:latest   
+xxx.cn-beijing.personal.cr.aliyuncs.com/zjh_test_docker/ubuntu-vim:latest                     2837239da35f        348MB         94.1MB
+my-ubuntu-vim:latest                                                                          2837239da35f        348MB         94.1MB
+nginx:latest                                                                                  553f64aecdc3        247MB         61.1MB    U
+ubuntu:latest
 ```
 
-当然我们可以将内容推送到docker hub上，过程也是类似的，具体的就不继续按照步骤弄了。
-
-
+当然我们可以将内容推送到 docker hub 上，过程也是类似的，具体的就不继续按照步骤弄了。
