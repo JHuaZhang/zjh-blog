@@ -94,6 +94,8 @@ jobs:
 
 ### 2.2、GitHub 统计卡片
 
+<p> <img src="https://github-readme-stats-lovat-beta.vercel.app/api?theme=gotham&username=JHuaZhang&show_icons=true" alt="JHuaZhang" />
+
 参考地址：[https://github.com/anuraghazra/github-readme-stats](https://github.com/anuraghazra/github-readme-stats)
 
 使用原本很简单，将如下代码复制到你的 markdown 文件中，更改 ?username= 的值为你的 GitHub 用户名：
