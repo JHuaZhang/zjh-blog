@@ -63,26 +63,26 @@ nav:
 
 （4）ts 的一个设计亮点就是并没有抛弃 js 的语法，ts 是 js 的超级，任何合法的 Js 语句在 ts 下都是合法的。
 
-## 4、ts开发环境搭建
+## 4、ts 开发环境搭建
 
-​	首先准备好node环境，然后全局安装typescript。
+​ 首先准备好 node 环境，然后全局安装 typescript。
 
 ```bash
 npm install -g typescript
 ```
 
-安装完成后检查版本：tsc -v 
+安装完成后检查版本：tsc -v
 
-## 5、ts初体验
+## 5、ts 初体验
 
-​	这里我们直接创建一个hello.ts文件，在之前我们介绍过ts是完全支持js的，因此这里我们直接写如下代码：
+​ 这里我们直接创建一个 hello.ts 文件，在之前我们介绍过 ts 是完全支持 js 的，因此这里我们直接写如下代码：
 
 ```
 console.log('hello TS');
 ```
 
-​	这个时候我们想该如何执行该代码，在js文件中，我们可以直接在node环境下使用`node hello.ts`执行js文件，同样的在这里我们也是可以使用node hello.ts的方式输出结果的。
+​ 这个时候我们想该如何执行该代码，在 js 文件中，我们可以直接在 node 环境下使用`node hello.ts`执行 js 文件，同样的在这里我们也是可以使用 node hello.ts 的方式输出结果的。
 
-​	而ts多给了我们一个`tsc hello.ts`，使用该命令可以创建一个js文件，即将ts中的内容编译成js文件，因此在上面例子中，我们会创建一个hello.js文件，该文件中的内容依旧是`console.log('hello TS');`。
+​ 而 ts 多给了我们一个`tsc hello.ts`，使用该命令可以创建一个 js 文件，即将 ts 中的内容编译成 js 文件，因此在上面例子中，我们会创建一个 hello.js 文件，该文件中的内容依旧是`console.log('hello TS');`。
 
-除此之外我们还能下载使用ts-node来执行ts文件，使用方式为`ts-node hello.ts`，该命令会将ts文件编译成js文件，然后再执行js文件。
+除此之外我们还能下载使用 ts-node 来执行 ts 文件，使用方式为`ts-node hello.ts`，该命令会将 ts 文件编译成 js 文件，然后再执行 js 文件。

@@ -41,7 +41,7 @@ const lisi1 = new Lisi(1, 2);
 console.log(lisi1, 'lisi1'); //Lisi { name: 1, age: 2 } lisi1
 ```
 
-如上的例子中，我们在constructor没有给name和age设置类型所以默认为any，因此后续创建list1实例是不会报错的。
+如上的例子中，我们在 constructor 没有给 name 和 age 设置类型所以默认为 any，因此后续创建 list1 实例是不会报错的。
 
 但是如果我们给 name 设置为 string 则会报错，因为在 List 中我们设置 name 为 lisi，因此 constructor 中 name 的类型只能为具体的字符串'lisi'。
 
@@ -65,7 +65,7 @@ console.log(lisi1, 'lisi1'); //Lisi { name: 'lisi', age: 2 } lisi1
 > - extend 继承父类
 > - implements 实现接口
 
-**在js中class的继承只有extend，而implements则是TS提供的。**
+**在 js 中 class 的继承只有 extend，而 implements 则是 TS 提供的。**
 
 ```typescript
 /*

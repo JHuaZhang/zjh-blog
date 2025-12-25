@@ -332,7 +332,7 @@ const ELEMENT_GOODS_SHORT_NAME: {
 const foo1 = 'aaa' as unknown as number; //number
 ```
 
-这样我们就把一个string的foo1断言成了number。
+这样我们就把一个 string 的 foo1 断言成了 number。
 
 ### 2.4、慎用类型断言
 
