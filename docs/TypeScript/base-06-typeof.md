@@ -10,34 +10,42 @@ nav:
 ---
 
 ## 1、介绍
-typeof在Js中也是常用来判断变量类型的关键字，我们先回顾一下typeof在js中的使用：
+
+typeof 在 Js 中也是常用来判断变量类型的关键字，我们先回顾一下 typeof 在 js 中的使用：
+
 ```typescript
-console.log(typeof undefined);//undefined
-console.log(typeof null);//object
-console.log(typeof true);//boolean
-console.log(typeof 1);//number
-console.log(typeof 'string');//string
-console.log(typeof []);//object
-console.log(typeof {});//object
-console.log(typeof BigInt(1));//bigint
-console.log(typeof Symbol(1));//symbol
-console.log(typeof function a() {});//function
+console.log(typeof undefined); //undefined
+console.log(typeof null); //object
+console.log(typeof true); //boolean
+console.log(typeof 1); //number
+console.log(typeof 'string'); //string
+console.log(typeof []); //object
+console.log(typeof {}); //object
+console.log(typeof BigInt(1)); //bigint
+console.log(typeof Symbol(1)); //symbol
+console.log(typeof function a() {}); //function
 ```
-实际上ts也提供了typeof操作符。可以在【类型上下文】中进行类型查询。但是注意这里只能进行变量或者属性的查询。
-### 1.1、typeof的类型保护与条件类型
+
+实际上 ts 也提供了 typeof 操作符。可以在【类型上下文】中进行类型查询。但是注意这里只能进行变量或者属性的查询。
+
+### 1.1、typeof 的类型保护与条件类型
+
 typeof 运算符的真正强大之处在于它与条件类型的结合使用。通过将 typeof 与条件类型结合，我们可以在运行时对不同类型的代码进行条件分支。
 举个例子：
-比如我们想要实现一个函数，将传入的数字或者字符串类型的数据自增1并返回
+比如我们想要实现一个函数，将传入的数字或者字符串类型的数据自增 1 并返回
+
 ```typescript
-function test (num: number | string): number | string {
-  return num++
+function test(num: number | string): number | string {
+  return num++;
 }
 //这时候ts报错，提示：An arithmetic operand must be of type 'any', 'number', 'bigint' or an enum type.
 //意思是：算术操作数的类型必须是“any”、“number”、“bigint”或枚举类型
 ```
-这个时候typeof就可以派上用场，改造如下：
+
+这个时候 typeof 就可以派上用场，改造如下：
+
 ```typescript
-function test (num: number | string): number | string {
+function test(num: number | string): number | string {
   if (typeof num === 'number') {
     return ++num;
   } else {
@@ -45,11 +53,14 @@ function test (num: number | string): number | string {
   }
 }
 ```
-### 1.2、typeof解析类型
-typeof 判断复杂类型时和js中的用法一样"object"、“function”、“symbol” 等等。
+
+### 1.2、typeof 解析类型
+
+typeof 判断复杂类型时和 js 中的用法一样"object"、“function”、“symbol” 等等。
 接下来我们看一下实际在开发中用的场景：
 
-**①、例如我们有个对象，如果对象嵌套深或者对象属性较多时，那么就可以直接用tyoeof来获取这个对象的属性中的所有类型。**
+**①、例如我们有个对象，如果对象嵌套深或者对象属性较多时，那么就可以直接用 tyoeof 来获取这个对象的属性中的所有类型。**
+
 ```typescript
 const person = {
   name: 'app',
@@ -67,26 +78,31 @@ function getNewPerson(person: Person) {
   return person;
 }
 getNewPerson(person);
-
 ```
-上面例子中，typeof会去解析person，获取person所有数据的类型。因此生成的type Person为
+
+上面例子中，typeof 会去解析 person，获取 person 所有数据的类型。因此生成的 type Person 为
+
 ```typescript
 type Person = {
+  name: string;
+  age: number;
+  sex: string;
+  info: {
     name: string;
     age: number;
     sex: string;
-    info: {
-        name: string;
-        age: number;
-        sex: string;
-    };
-}
+  };
+};
 ```
+
 **②、也可以获取对象中单个属性的类型**
+
 ```typescript
-type PersonName = typeof person.name //string
+type PersonName = typeof person.name; //string
 ```
-**③、当我想要通过函数创建并获取类的实例，那么就可以通过typeof获取到class构造函数的类型**
+
+**③、当我想要通过函数创建并获取类的实例，那么就可以通过 typeof 获取到 class 构造函数的类型**
+
 ```typescript
 class APP {
   name: string;
@@ -102,9 +118,10 @@ function createApp(CP: typeof APP, name: string, img: string) {
 }
 
 createApp(APP, '123', '123');
-
 ```
-**④、typeof只能用来查询变量或者属性的类型。无法查询其他形式的类型。比如说返回调用的类型。**
+
+**④、typeof 只能用来查询变量或者属性的类型。无法查询其他形式的类型。比如说返回调用的类型。**
+
 ```typescript
 let p = {
   num1: 10,
@@ -118,7 +135,9 @@ function add(param: typeof p): number {
 let sum:typeof add(4,8)//逗号运算符的左侧未使用，没有任何副作用。
 
 ```
+
 ## 2、举例说明
+
 ```typescript
 export interface RemoteSearchOptions {
   /** 输入防抖延迟，默认为 200（单位 ms） */
@@ -183,8 +202,8 @@ export declare class RemoteSearch {
     state: string;
   };
 }
-
 ```
+
 ```typescript
 import { AsyncValue, RemoteSearch } from '@alife/hippo-xform';
 export function useRemoteSearch(...args: ConstructorParameters<typeof RemoteSearch>) {
@@ -199,4 +218,5 @@ export function useRemoteSearch(...args: ConstructorParameters<typeof RemoteSear
   return remoteSearch;
 }
 ```
-我们这里的类型用typeof来解析@alife/hippo-xform库中设置的RemoteSearch类。因为这里组件库并没有单独定义一个接口供用户使用，而是直接使用的类，这种情况下我们就只能使用typeof解析该抛出的类。
+
+我们这里的类型用 typeof 来解析@alife/hippo-xform 库中设置的 RemoteSearch 类。因为这里组件库并没有单独定义一个接口供用户使用，而是直接使用的类，这种情况下我们就只能使用 typeof 解析该抛出的类。

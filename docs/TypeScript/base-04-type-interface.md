@@ -108,7 +108,7 @@ const myDictionary: Dictionary = {
 const value = myDictionary.TWO; //value在鼠标悬浮的时候会自动显示为number类型
 ```
 
-在这个例子中，myDictionary对象的键是字符串，值是数字。当我们通过索引获取键为TWO的值时，TypeScript 知道该值的类型为number，因为我们在Dictionary接口中定义了索引签名。
+在这个例子中，myDictionary 对象的键是字符串，值是数字。当我们通过索引获取键为 TWO 的值时，TypeScript 知道该值的类型为 number，因为我们在 Dictionary 接口中定义了索引签名。
 
 通过接口描述索引的类型和通过索引获取的值的类型，可以使我们在编写代码时更加安全和可靠，因为 TypeScript 会进行类型检查，确保我们使用正确的键和值类型。
 

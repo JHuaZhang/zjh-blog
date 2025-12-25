@@ -9,13 +9,13 @@ nav:
   order: 1
 ---
 
-## 1、Docker安装
+## 1、Docker 安装
 
-Docker 的安装方法因操作系统而异。以下是主流操作系统（Linux、Windows、macOS）上安装Docker的详细指南。
+Docker 的安装方法因操作系统而异。以下是主流操作系统（Linux、Windows、macOS）上安装 Docker 的详细指南。
 
-### 1.1、在Linux上安装Docker（以Ubuntu为例）
+### 1.1、在 Linux 上安装 Docker（以 Ubuntu 为例）
 
-官方推荐使用Docker Engine（社区版，即Docker CE）。
+官方推荐使用 Docker Engine（社区版，即 Docker CE）。
 
 **步骤 1：卸载旧版本（如有）**
 
@@ -30,7 +30,7 @@ sudo apt update
 sudo apt install ca-certificates curl gnupg lsb-release
 ```
 
-**步骤 3：添加Docker官方GPG密钥**
+**步骤 3：添加 Docker 官方 GPG 密钥**
 
 ```bash
 sudo mkdir -p /etc/apt/keyrings
@@ -67,19 +67,19 @@ sudo usermod -aG docker $USER
 
 之后就可以直接运行 docker ps 而无需 sudo。
 
-### 1.2、在macOS上安装Docker
+### 1.2、在 macOS 上安装 Docker
 
-macOS不支持原生运行Docker Engine（因为内核不同），但可通过Docker Desktop for Mac提供完整体验。
+macOS 不支持原生运行 Docker Engine（因为内核不同），但可通过 Docker Desktop for Mac 提供完整体验。
 
 安装步骤：
 
 访问官网下载页面：[https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
 
-下载.dmg安装包并双击安装。
+下载.dmg 安装包并双击安装。
 
-拖动Docker图标到Applications文件夹完成安装。
+拖动 Docker 图标到 Applications 文件夹完成安装。
 
-在Launchpad中打开Docker Desktop，首次启动会提示输入密码并配置。
+在 Launchpad 中打开 Docker Desktop，首次启动会提示输入密码并配置。
 
 安装完成后，打开终端，运行：
 
@@ -90,35 +90,35 @@ docker run hello-world
 
 注意：需要 macOS 10.15（Catalina）或更高版本，并启用虚拟化（Intel 芯片需开启 VT-x，Apple Silicon 原生支持）。
 
-### 1.3、在Windows上安装Docker
+### 1.3、在 Windows 上安装 Docker
 
-Windows有两种选择：
+Windows 有两种选择：
 
 - Docker Desktop for Windows（推荐，适用于开发）
 - Docker Engine on WSL 2（通过 Windows Subsystem for Linux）
 
-推荐方式：安装Docker Desktop
+推荐方式：安装 Docker Desktop
 
 **前提条件：**
 
-- Windows 10/11 64位：专业版、企业版或教育版（家庭版需额外步骤）。
-- 启用WSL 2和Hyper-V（或使用WSL 2后端）。
-- 至少4GB内存。
+- Windows 10/11 64 位：专业版、企业版或教育版（家庭版需额外步骤）。
+- 启用 WSL 2 和 Hyper-V（或使用 WSL 2 后端）。
+- 至少 4GB 内存。
 
 **安装步骤：**
 
-1. 下载Docker Desktop：[https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+1. 下载 Docker Desktop：[https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
 2. 运行安装程序（.exe），按提示安装。
 3. 安装完成后重启电脑（如提示）。
-4. 首次启动Docker Desktop，登录或跳过账户。
-5. 打开PowerShell或CMD，运行：
+4. 首次启动 Docker Desktop，登录或跳过账户。
+5. 打开 PowerShell 或 CMD，运行：
 
 ```bash
 docker --version
 docker run hello-world
 ```
 
-对于Windows家庭版用户：需先安装WSL 2，再安装Docker Desktop（新版已支持家庭版）。
+对于 Windows 家庭版用户：需先安装 WSL 2，再安装 Docker Desktop（新版已支持家庭版）。
 
 ### 1.4、验证安装是否成功
 
@@ -137,11 +137,11 @@ Hello from Docker!
 This message shows your installation appears to be working correctly.
 ```
 
-说明Docker已正确安装！
+说明 Docker 已正确安装！
 
 ## 2、应用安装
 
-安装完成Docker之后，就可以通过Docker安装一些应用，我们可以访问[https://hub.docker.com/](https://hub.docker.com/)，这个类似 npm，进行应用版本的管理，可以直接在网站中搜索需要安装的软件，比如下面我们想安装一个 nginx，可以先在网站中搜索 nginx:
+安装完成 Docker 之后，就可以通过 Docker 安装一些应用，我们可以访问[https://hub.docker.com/](https://hub.docker.com/)，这个类似 npm，进行应用版本的管理，可以直接在网站中搜索需要安装的软件，比如下面我们想安装一个 nginx，可以先在网站中搜索 nginx:
 ![示例图片](../images/docker/docker202512081356.png)
 
 然后点进去查看详情，找相应版本的安装命令：
@@ -166,7 +166,7 @@ Digest: sha256:8a12ca7fe29679a2197396f42180ca0a57bea1a7c92f7212f19393bbb07b4bb3
 Status: Downloaded newer image for nginx:1.29-perl
 ```
 
-我们可以通过docker images查看我们已经安装的应用：
+我们可以通过 docker images 查看我们已经安装的应用：
 
 ```bash
 zhangjianhua@U-QCX2V1Y9-0238 zjh % docker images
@@ -198,9 +198,9 @@ sudo dnf remove docker \
 sudo dnf install -y yum-utils device-mapper-persistent-data lvm2
 ```
 
-注意：虽然系统用dnf，但yum-utils仍然可用（Alibaba Cloud Linux 兼容）。
+注意：虽然系统用 dnf，但 yum-utils 仍然可用（Alibaba Cloud Linux 兼容）。
 
-**步骤 3：添加Docker官方仓库**
+**步骤 3：添加 Docker 官方仓库**
 
 ```bash
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
@@ -218,7 +218,7 @@ sudo sed -i 's|https://download.docker.com|https://mirrors.aliyun.com/docker-ce|
 
 这一步强烈建议在阿里云 ECS 上执行，避免因网络问题导致安装失败。
 
-**步骤 5：安装Docker Engine**
+**步骤 5：安装 Docker Engine**
 
 ```bash
 sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -277,7 +277,7 @@ newgrp docker
 docker ps
 ```
 
-**步骤 9：（可选）配置Docker镜像加速器（阿里云）**
+**步骤 9：（可选）配置 Docker 镜像加速器（阿里云）**
 
 在阿里云上拉取 Docker Hub 镜像可能较慢，建议配置镜像加速器：
 
@@ -307,7 +307,7 @@ sudo tee /etc/docker/daemon.json <<-'EOF'
 EOF
 ```
 
-重启Docker生效：
+重启 Docker 生效：
 
 ```bash
 sudo systemctl daemon-reexec
