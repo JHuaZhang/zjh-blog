@@ -6,7 +6,7 @@ title: Linux的目录结构
 
 nav:
   title: DevOps
-  order: 1
+  order: 2
 ---
 
 ## 1、根目录/

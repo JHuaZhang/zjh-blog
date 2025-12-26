@@ -6,7 +6,7 @@ title: docker commit创建新镜像及镜像私有化
 
 nav:
   title: DevOps
-  order: 1
+  order: 2
 ---
 
 ## 1、docker commit 命令介绍

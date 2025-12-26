@@ -6,7 +6,7 @@ title: 文件操作相关命令
 
 nav:
   title: DevOps
-  order: 1
+  order: 2
 ---
 
 ## 1、ls 命令
