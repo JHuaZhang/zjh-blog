@@ -20,19 +20,66 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'pnpm'
+
       - name: Install Dependencies
         run: pnpm install
+
       - name: Build Documentation Site
         run: pnpm run docs:build-site
+
+      - name: Clean invalid filenames (Fix colon issue)
+        run: |
+          echo "🔧 清理文件名中的非法字符（冒号）..."
+
+          # 方法1：使用find命令递归处理（适用于Linux/macOS）
+          # 处理包含冒号的目录
+          find dist -depth -type d -name "*:*" | while read dir; do
+            new_dir=$(echo "$dir" | tr ':' '_')
+            mv "$dir" "$new_dir"
+            echo "📁 重命名目录: $dir → $new_dir"
+          done
+
+          # 处理包含冒号的文件
+          find dist -depth -type f -name "*:*" | while read file; do
+            new_file=$(echo "$file" | tr ':' '_')
+            mv "$file" "$new_file"
+            echo "📄 重命名文件: $file → $new_file"
+          done
+
+          # 方法2：备用方案 - 使用更安全的处理方式
+          # 如果有嵌套的冒号，需要多层处理
+          echo "🔄 执行二次清理检查..."
+          find dist -depth -name "*:*" | while read item; do
+            # 获取基本名称和目录
+            base_name=$(basename "$item")
+            dir_name=$(dirname "$item")
+            # 替换所有冒号
+            safe_name=$(echo "$base_name" | tr ':' '_')
+            # 移动
+            mv "$item" "$dir_name/$safe_name"
+          done
+
+          # 验证清理结果
+          echo "✅ 清理完成，验证结果..."
+          if find dist -name "*:*" -o -name "*:*" | grep -q .; then
+            echo "❌ 错误：仍有包含冒号的文件名"
+            find dist -name "*:*"
+            exit 1
+          else
+            echo "🎉 所有文件名已清理干净！"
+          fi
+
       - name: Verify Build Output
         run: |
           if [ ! -d "dist" ]; then
@@ -40,15 +87,18 @@ jobs:
             exit 1
           else
             echo "✅ Build output verified in dist/"
-            ls -la dist/
+            echo "📂 文件结构示例："
+            find dist -type f | head -20
           fi
+
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
+
       - name: Upload Artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-      # ============ 新增步骤：为服务器部署保留产物 ============
+
       - name: Upload Build Artifact for Server
         uses: actions/upload-artifact@v4
         with:
@@ -70,42 +120,71 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # ============ 部署到阿里云服务器 ============
   deploy-to-server:
-    needs: build # 依赖于构建阶段
+    needs: build
     runs-on: ubuntu-latest
     concurrency: deploy-to-server
     steps:
-      # 1. 下载上一步构建好的产物
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: site-dist
           path: ./dist-to-deploy
 
-      # 2. 配置 SSH 连接（使用之前设置的 Secrets）
-      - name: Setup SSH
+      - name: Verify Downloaded Files
+        run: |
+          echo "📦 已下载构建产物："
+          find ./dist-to-deploy -type f | head -10
+          echo "📊 总文件数：$(find ./dist-to-deploy -type f | wc -l)"
+
+      - name: Setup SSH Connection
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          echo "✅ 私钥已写入"
 
-      # 3. 使用 rsync 同步文件到服务器
+          # 添加服务器到已知主机（避免交互提示）
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          echo "✅ 服务器主机密钥已添加"
+
+          # 测试SSH连接
+          echo "🔍 测试SSH连接..."
+          ssh -o BatchMode=yes ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo 'SSH连接测试成功'"
+
       - name: Deploy to Server via rsync
         run: |
-          echo "🚀 开始同步到服务器..."
+          echo "🚀 开始同步文件到服务器..."
+          echo "目标路径：${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}"
+
+          # 使用rsync同步（显示进度，排除.git等文件）
           rsync -avz \
+            --progress \
             --delete \
+            --exclude='.git*' \
+            --exclude='.github' \
             ./dist-to-deploy/ \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/
 
-      # 4. 验证部署
+          echo "✅ 文件同步完成"
+
       - name: Verify Server Deployment
         run: |
-          echo "✅ 同步完成，验证部署..."
+          echo "🔍 验证服务器部署..."
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            cd ${{ secrets.TARGET_PATH }}
-            echo '部署完成时间: $(date)'
-            echo '目录大小: $(du -sh .)'
+            echo '========== 部署验证报告 =========='
+            echo '服务器时间: $(date)'
+            echo '部署路径: ${{ secrets.TARGET_PATH }}'
+            echo '当前用户: $(whoami)'
+            echo '目录权限:'
+            ls -ld ${{ secrets.TARGET_PATH }}
+            echo '文件数量统计:'
+            find ${{ secrets.TARGET_PATH }} -type f | wc -l
+            echo '磁盘使用情况:'
+            du -sh ${{ secrets.TARGET_PATH }}
+            echo '示例文件列表:'
+            ls -la ${{ secrets.TARGET_PATH }} | head -10
+            echo '================================='
           "
+
+          echo "🎉 服务器部署验证完成！"
