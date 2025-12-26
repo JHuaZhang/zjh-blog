@@ -41,14 +41,12 @@ jobs:
       - name: Clean Invalid Filenames (Fix Colon Issue)
         run: |
           echo "🔧 清理文件名中的非法字符（冒号）..."
-          # 递归处理所有包含冒号的文件和目录
           find dist -depth -name '*:*' | while read item; do
             new_item=$(echo "$item" | tr ':' '_')
             mv "$item" "$new_item"
             echo "📝 重命名: $item → $new_item"
           done
 
-          # 验证清理结果
           echo "✅ 验证清理结果..."
           if find dist -name '*:*' | grep -q .; then
             echo "❌ 仍有包含冒号的文件"
@@ -117,15 +115,12 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          # 写入私钥
           echo '${{ secrets.SSH_PRIVATE_KEY }}' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          # 验证私钥格式
           echo '🔍 验证私钥格式...'
           if ! head -1 ~/.ssh/id_rsa | grep -q 'BEGIN.*PRIVATE KEY'; then
             echo '❌ 错误：私钥缺少 BEGIN 标记行'
-            echo '请确保 GitHub Secret SSH_PRIVATE_KEY 包含完整的私钥'
             head -2 ~/.ssh/id_rsa
             exit 1
           fi
@@ -138,10 +133,8 @@ jobs:
 
           echo '✅ 私钥格式正确'
 
-          # 添加服务器到已知主机
           ssh-keyscan -H '${{ secrets.SERVER_HOST }}' >> ~/.ssh/known_hosts
 
-          # 测试连接
           echo '🔗 测试 SSH 连接...'
           if ssh -o BatchMode=yes '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' 'echo SSH连接成功'; then
             echo '✅ SSH 连接测试通过'
@@ -150,31 +143,47 @@ jobs:
             exit 1
           fi
 
-      # 合并安装和使用 rsync 到同一个步骤，解决环境问题
-      - name: Install and Deploy with rsync
+      # 关键修复：完全使用独立的环境执行 rsync
+      - name: Deploy with rsync (Fixed)
         run: |
-          echo '📦 安装并配置 rsync...'
-          sudo apt-get update
-          sudo apt-get install -y rsync
-
-          # 刷新 shell 命令缓存
-          hash -r
-
           echo '🚀 开始同步文件到服务器...'
           echo "目标路径：${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}"
 
-          # 验证 rsync 可用
-          echo '🔍 验证 rsync 可用性...'
-          rsync --version
+          # 确保在全新的 shell 环境中执行
+          /bin/bash -c "
+            # 安装 rsync（确保可用）
+            sudo apt-get update -qq
+            sudo apt-get install -y rsync >/dev/null 2>&1
+            
+            # 验证 rsync 命令
+            if ! command -v rsync &> /dev/null; then
+              echo '❌ rsync 命令不存在'
+              exit 1
+            fi
+            
+            # 显示 rsync 版本
+            echo '🔍 rsync 版本：'
+            rsync --version | head -1
+            
+            # 执行同步
+            echo '🔄 正在同步文件...'
+            rsync -avz \
+              --progress \
+              --delete \
+              ./dist-to-deploy/ \
+              '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/'
+            
+            echo '✅ 文件同步完成'
+          "
 
-          # 执行同步
-          rsync -avz \
-            --progress \
-            --delete \
-            ./dist-to-deploy/ \
-            '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/'
-
-          echo '✅ 文件同步完成'
+          # 额外的验证
+          echo '🔍 验证文件是否成功同步...'
+          if [ $? -eq 0 ]; then
+            echo '🎉 rsync 命令执行成功！'
+          else
+            echo '❌ rsync 命令执行失败'
+            exit 1
+          fi
 
       - name: Verify Server Deployment
         run: |
