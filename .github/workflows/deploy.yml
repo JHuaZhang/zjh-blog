@@ -170,7 +170,7 @@ jobs:
 
       - name: Verify Server Deployment
         run: |
-          echo "🔍 验证服务器部署..."
+          echo "🔍 验证服务器部署...."
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             echo '========== 部署验证报告 =========='
             echo '服务器时间: $(date)'
