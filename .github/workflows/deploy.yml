@@ -20,60 +20,41 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'pnpm'
-
       - name: Install Dependencies
         run: pnpm install
-
       - name: Build Documentation Site
         run: pnpm run docs:build-site
-
-      - name: Clean Invalid Filenames (Fix Colon Issue)
+      - name: Clean Invalid Filenames
         run: |
-          echo "🔧 清理文件名中的非法字符（冒号）..."
+          echo "🔧 清理文件名中的冒号..."
           find dist -depth -name '*:*' | while read item; do
-            new_item=$(echo "$item" | tr ':' '_')
-            mv "$item" "$new_item"
-            echo "📝 重命名: $item → $new_item"
+            mv "$item" "$(echo "$item" | tr ':' '_')"
           done
-
-          echo "✅ 验证清理结果..."
           if find dist -name '*:*' | grep -q .; then
             echo "❌ 仍有包含冒号的文件"
-            find dist -name '*:*'
             exit 1
-          else
-            echo "🎉 所有文件名已清理干净"
           fi
-
       - name: Verify Build Output
         run: |
           if [ ! -d 'dist' ]; then
             echo '❌ Build output directory dist not found!'
             exit 1
-          else
-            echo '✅ Build output verified in dist/'
-            echo "📂 文件数量：$(find dist -type f | wc -l)"
           fi
-
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
-
       - name: Upload Artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-
       - name: Upload Build Artifact for Server
         uses: actions/upload-artifact@v4
         with:
@@ -109,111 +90,50 @@ jobs:
       - name: Verify Downloaded Files
         run: |
           echo '📦 已下载构建产物'
-          echo "📊 总文件数：$(find ./dist-to-deploy -type f | wc -l)"
-          echo "📁 目录结构："
-          ls -la ./dist-to-deploy/
+          echo "文件数量：$(find ./dist-to-deploy -type f | wc -l)"
 
       - name: Setup SSH Connection
         run: |
           mkdir -p ~/.ssh
-
           echo '${{ secrets.SSH_PRIVATE_KEY }}' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
-          echo '🔍 验证私钥格式...'
-          if ! head -1 ~/.ssh/id_rsa | grep -q 'BEGIN.*PRIVATE KEY'; then
-            echo '❌ 错误：私钥缺少 BEGIN 标记行'
-            head -2 ~/.ssh/id_rsa
-            exit 1
-          fi
-
-          if ! tail -1 ~/.ssh/id_rsa | grep -q 'END.*PRIVATE KEY'; then
-            echo '❌ 错误：私钥缺少 END 标记行'
-            tail -2 ~/.ssh/id_rsa
-            exit 1
-          fi
-
-          echo '✅ 私钥格式正确'
-
           ssh-keyscan -H '${{ secrets.SERVER_HOST }}' >> ~/.ssh/known_hosts
 
-          echo '🔗 测试 SSH 连接...'
-          if ssh -o BatchMode=yes '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' 'echo SSH连接成功'; then
-            echo '✅ SSH 连接测试通过'
-          else
-            echo '❌ SSH 连接失败'
-            exit 1
-          fi
-
-      - name: Deploy with rsync (Final Fix)
+      - name: Deploy with scp
         run: |
-          echo '🚀 开始同步文件到服务器...'
+          echo '🚀 开始使用 scp 同步文件到服务器...'
           echo "目标路径：${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}"
 
-          # 1. 安装 rsync（如果尚未安装）
-          echo '📦 确保 rsync 已安装...'
-          sudo apt-get update -qq
-          if ! dpkg -l | grep -q rsync; then
-            sudo apt-get install -y rsync
-          fi
-
-          # 2. 查找 rsync 的绝对路径
-          RSYNC_PATH=$(which rsync || echo "/usr/bin/rsync")
-          echo "🔍 找到 rsync 路径: $RSYNC_PATH"
-
-          # 3. 验证 rsync 可用性
-          echo '🔍 验证 rsync 可用性...'
-          $RSYNC_PATH --version | head -1
-
-          # 4. 手动刷新 shell 环境
-          echo '🔄 刷新 shell 环境...'
-          hash -r
-          export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
-
-          # 5. 显示源目录信息
-          echo '📁 源目录信息：'
-          echo "文件数量: $(find ./dist-to-deploy -type f | wc -l)"
-          echo "目录大小: $(du -sh ./dist-to-deploy)"
-          echo "示例文件:"
-          find ./dist-to-deploy -type f | head -5
-
-          # 6. 检查目标目录（同步前）
-          echo '🔍 检查目标目录（同步前）...'
+          # 1. 清理服务器目标目录（确保干净）
+          echo '🧹 清理服务器目标目录...'
           ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
-            echo '目标目录: ${{ secrets.TARGET_PATH }}'
+            # 删除目标目录中的所有内容，但保留目录本身
             if [ -d '${{ secrets.TARGET_PATH }}' ]; then
-              echo '✅ 目录存在'
-              echo '当前内容:'
-              ls -la '${{ secrets.TARGET_PATH }}'
+              rm -rf '${{ secrets.TARGET_PATH }}'/*
+              echo '✅ 目标目录已清空'
             else
-              echo '❌ 目录不存在，将创建'
+              mkdir -p '${{ secrets.TARGET_PATH }}'
+              echo '✅ 目标目录已创建'
             fi
           "
 
-          # 7. 执行 rsync 同步（使用绝对路径）
-          echo '🔄 正在同步文件...'
-          $RSYNC_PATH -avz \
-            --progress \
-            --delete \
-            --stats \
-            ./dist-to-deploy/ \
-            '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/'
+          # 2. 使用 scp 递归复制整个目录
+          echo '📤 正在上传文件到服务器...'
+          scp -r ./dist-to-deploy/* '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/'
 
-          echo '✅ 文件同步命令执行完成'
+          echo '✅ 文件传输完成！'
 
-          # 8. 验证同步结果
-          echo '🔍 验证同步结果...'
+          # 3. 验证传输结果
+          echo '🔍 验证传输结果...'
           ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
-            echo '========== 同步验证 =========='
+            echo '========== 传输验证 =========='
             echo '目标目录: ${{ secrets.TARGET_PATH }}'
-            echo '文件数量: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
+            echo '传输的文件数量: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
             echo '目录大小: \$(du -sh ${{ secrets.TARGET_PATH }})'
-            echo '最新文件:'
-            find '${{ secrets.TARGET_PATH }}' -type f -exec ls -lh {} \; | head -5
+            echo '前5个文件:'
+            find '${{ secrets.TARGET_PATH }}' -type f | head -5
             echo '=============================='
           "
-
-          echo '🎉 文件同步流程完成！'
       # =============================================
       - name: Final Server Verification
         run: |
@@ -222,13 +142,10 @@ jobs:
             echo '========== 最终验证 =========='
             echo '服务器时间: \$(date)'
             echo '部署目录: ${{ secrets.TARGET_PATH }}'
-            echo '目录权限:'
-            ls -ld '${{ secrets.TARGET_PATH }}'
-            echo '目录内容:'
-            ls -la '${{ secrets.TARGET_PATH }}'
-            echo '文件列表:'
-            find '${{ secrets.TARGET_PATH }}' -type f | head -10
+            echo '完整文件列表:'
+            ls -la '${{ secrets.TARGET_PATH }}' | head -15
+            echo '总文件数: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
             echo '=============================='
           "
 
-          echo '🎉 部署验证完成！'
+          echo '🎉 部署完成！'
