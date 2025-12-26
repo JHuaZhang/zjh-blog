@@ -38,46 +38,26 @@ jobs:
       - name: Build Documentation Site
         run: pnpm run docs:build-site
 
-      - name: Clean invalid filenames (Fix colon issue)
+      # ============ 修复：清理文件名中的冒号 ============
+      - name: Clean invalid filenames
         run: |
           echo "🔧 清理文件名中的非法字符（冒号）..."
 
-          # 方法1：使用find命令递归处理（适用于Linux/macOS）
-          # 处理包含冒号的目录
-          find dist -depth -type d -name "*:*" | while read dir; do
-            new_dir=$(echo "$dir" | tr ':' '_')
-            mv "$dir" "$new_dir"
-            echo "📁 重命名目录: $dir → $new_dir"
-          done
-
-          # 处理包含冒号的文件
-          find dist -depth -type f -name "*:*" | while read file; do
-            new_file=$(echo "$file" | tr ':' '_')
-            mv "$file" "$new_file"
-            echo "📄 重命名文件: $file → $new_file"
-          done
-
-          # 方法2：备用方案 - 使用更安全的处理方式
-          # 如果有嵌套的冒号，需要多层处理
-          echo "🔄 执行二次清理检查..."
+          # 递归处理所有包含冒号的文件和目录
           find dist -depth -name "*:*" | while read item; do
-            # 获取基本名称和目录
-            base_name=$(basename "$item")
-            dir_name=$(dirname "$item")
-            # 替换所有冒号
-            safe_name=$(echo "$base_name" | tr ':' '_')
-            # 移动
-            mv "$item" "$dir_name/$safe_name"
+            new_item=$(echo "$item" | tr ':' '_')
+            mv "$item" "$new_item"
+            echo "📝 重命名: $item → $new_item"
           done
 
           # 验证清理结果
-          echo "✅ 清理完成，验证结果..."
-          if find dist -name "*:*" -o -name "*:*" | grep -q .; then
-            echo "❌ 错误：仍有包含冒号的文件名"
+          echo "✅ 验证清理结果..."
+          if find dist -name "*:*" | grep -q .; then
+            echo "❌ 仍有包含冒号的文件"
             find dist -name "*:*"
             exit 1
           else
-            echo "🎉 所有文件名已清理干净！"
+            echo "🎉 所有文件名已清理干净"
           fi
 
       - name: Verify Build Output
@@ -87,8 +67,7 @@ jobs:
             exit 1
           else
             echo "✅ Build output verified in dist/"
-            echo "📂 文件结构示例："
-            find dist -type f | head -20
+            echo "📂 文件数量：$(find dist -type f | wc -l)"
           fi
 
       - name: Setup GitHub Pages
@@ -133,36 +112,66 @@ jobs:
 
       - name: Verify Downloaded Files
         run: |
-          echo "📦 已下载构建产物："
-          find ./dist-to-deploy -type f | head -10
+          echo "📦 已下载构建产物"
           echo "📊 总文件数：$(find ./dist-to-deploy -type f | wc -l)"
 
       - name: Setup SSH Connection
         run: |
           mkdir -p ~/.ssh
+          # 写入私钥
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo "✅ 私钥已写入"
 
-          # 添加服务器到已知主机（避免交互提示）
+          # 验证私钥格式（防止格式错误）
+          echo "🔍 验证私钥格式..."
+          if ! head -1 ~/.ssh/id_rsa | grep -q "BEGIN.*PRIVATE KEY"; then
+            echo "❌ 错误：私钥缺少 BEGIN 标记行"
+            echo "请确保 GitHub Secret SSH_PRIVATE_KEY 包含完整的私钥（从 -----BEGIN 到 -----END）"
+            head -2 ~/.ssh/id_rsa
+            exit 1
+          fi
+
+          if ! tail -1 ~/.ssh/id_rsa | grep -q "END.*PRIVATE KEY"; then
+            echo "❌ 错误：私钥缺少 END 标记行"
+            tail -2 ~/.ssh/id_rsa
+            exit 1
+          fi
+
+          echo "✅ 私钥格式正确"
+
+          # 添加服务器到已知主机
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-          echo "✅ 服务器主机密钥已添加"
 
-          # 测试SSH连接
-          echo "🔍 测试SSH连接..."
-          ssh -o BatchMode=yes ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo 'SSH连接测试成功'"
+          # 测试连接
+          echo "🔗 测试 SSH 连接..."
+          if ssh -o BatchMode=yes ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo 'SSH连接成功'"; then
+            echo "✅ SSH 连接测试通过"
+          else
+            echo "❌ SSH 连接失败"
+            exit 1
+          fi
+
+      - name: Install rsync
+        run: |
+          echo "📦 安装 rsync 同步工具..."
+          sudo apt-get update
+          sudo apt-get install -y rsync
+          echo "✅ rsync 安装完成"
+          rsync --version | head -1
 
       - name: Deploy to Server via rsync
         run: |
           echo "🚀 开始同步文件到服务器..."
           echo "目标路径：${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}"
 
-          # 使用rsync同步（显示进度，排除.git等文件）
+          # 显示同步详情
+          echo "📋 同步统计："
+          find ./dist-to-deploy -type f | wc -l
+
+          # 执行同步
           rsync -avz \
             --progress \
             --delete \
-            --exclude='.git*' \
-            --exclude='.github' \
             ./dist-to-deploy/ \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/
 
@@ -170,21 +179,16 @@ jobs:
 
       - name: Verify Server Deployment
         run: |
-          echo "🔍 验证服务器部署...."
+          echo "🔍 验证服务器部署..."
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            echo '========== 部署验证报告 =========='
+            echo '========== 部署验证 =========='
             echo '服务器时间: $(date)'
-            echo '部署路径: ${{ secrets.TARGET_PATH }}'
-            echo '当前用户: $(whoami)'
-            echo '目录权限:'
-            ls -ld ${{ secrets.TARGET_PATH }}
-            echo '文件数量统计:'
-            find ${{ secrets.TARGET_PATH }} -type f | wc -l
-            echo '磁盘使用情况:'
-            du -sh ${{ secrets.TARGET_PATH }}
-            echo '示例文件列表:'
-            ls -la ${{ secrets.TARGET_PATH }} | head -10
-            echo '================================='
+            echo '部署目录: ${{ secrets.TARGET_PATH }}'
+            echo '目录大小: $(du -sh ${{ secrets.TARGET_PATH }})'
+            echo '文件数量: $(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
+            echo '示例文件:'
+            ls -la ${{ secrets.TARGET_PATH }} | head -5
+            echo '=============================='
           "
 
-          echo "🎉 服务器部署验证完成！"
+          echo "🎉 部署验证完成！"
