@@ -150,20 +150,25 @@ jobs:
             exit 1
           fi
 
-      - name: Install rsync
+      # 合并安装和使用 rsync 到同一个步骤，解决环境问题
+      - name: Install and Deploy with rsync
         run: |
-          echo '📦 安装 rsync 同步工具...'
+          echo '📦 安装并配置 rsync...'
           sudo apt-get update
           sudo apt-get install -y rsync
-          echo '✅ rsync 安装完成'
 
-      - name: Deploy to Server via rsync
-        run: |
+          # 刷新 shell 命令缓存
+          hash -r
+
           echo '🚀 开始同步文件到服务器...'
           echo "目标路径：${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}"
 
-          # 使用完整路径调用 rsync，避免环境问题
-          /usr/bin/rsync -avz \
+          # 验证 rsync 可用
+          echo '🔍 验证 rsync 可用性...'
+          rsync --version
+
+          # 执行同步
+          rsync -avz \
             --progress \
             --delete \
             ./dist-to-deploy/ \
