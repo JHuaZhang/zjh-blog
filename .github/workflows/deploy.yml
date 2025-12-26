@@ -110,6 +110,8 @@ jobs:
         run: |
           echo '📦 已下载构建产物'
           echo "📊 总文件数：$(find ./dist-to-deploy -type f | wc -l)"
+          echo "📁 目录结构："
+          ls -la ./dist-to-deploy/
 
       - name: Setup SSH Connection
         run: |
@@ -143,59 +145,89 @@ jobs:
             exit 1
           fi
 
-      # 关键修复：完全使用独立的环境执行 rsync
-      - name: Deploy with rsync (Fixed)
+      - name: Deploy with rsync (Final Fix)
         run: |
           echo '🚀 开始同步文件到服务器...'
           echo "目标路径：${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}"
 
-          # 确保在全新的 shell 环境中执行
-          /bin/bash -c "
-            # 安装 rsync（确保可用）
-            sudo apt-get update -qq
-            sudo apt-get install -y rsync >/dev/null 2>&1
-            
-            # 验证 rsync 命令
-            if ! command -v rsync &> /dev/null; then
-              echo '❌ rsync 命令不存在'
-              exit 1
-            fi
-            
-            # 显示 rsync 版本
-            echo '🔍 rsync 版本：'
-            rsync --version | head -1
-            
-            # 执行同步
-            echo '🔄 正在同步文件...'
-            rsync -avz \
-              --progress \
-              --delete \
-              ./dist-to-deploy/ \
-              '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/'
-            
-            echo '✅ 文件同步完成'
-          "
-
-          # 额外的验证
-          echo '🔍 验证文件是否成功同步...'
-          if [ $? -eq 0 ]; then
-            echo '🎉 rsync 命令执行成功！'
-          else
-            echo '❌ rsync 命令执行失败'
-            exit 1
+          # 1. 安装 rsync（如果尚未安装）
+          echo '📦 确保 rsync 已安装...'
+          sudo apt-get update -qq
+          if ! dpkg -l | grep -q rsync; then
+            sudo apt-get install -y rsync
           fi
 
-      - name: Verify Server Deployment
-        run: |
-          echo '🔍 验证服务器部署...'
+          # 2. 查找 rsync 的绝对路径
+          RSYNC_PATH=$(which rsync || echo "/usr/bin/rsync")
+          echo "🔍 找到 rsync 路径: $RSYNC_PATH"
+
+          # 3. 验证 rsync 可用性
+          echo '🔍 验证 rsync 可用性...'
+          $RSYNC_PATH --version | head -1
+
+          # 4. 手动刷新 shell 环境
+          echo '🔄 刷新 shell 环境...'
+          hash -r
+          export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+          # 5. 显示源目录信息
+          echo '📁 源目录信息：'
+          echo "文件数量: $(find ./dist-to-deploy -type f | wc -l)"
+          echo "目录大小: $(du -sh ./dist-to-deploy)"
+          echo "示例文件:"
+          find ./dist-to-deploy -type f | head -5
+
+          # 6. 检查目标目录（同步前）
+          echo '🔍 检查目标目录（同步前）...'
           ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
-            echo '========== 部署验证 =========='
+            echo '目标目录: ${{ secrets.TARGET_PATH }}'
+            if [ -d '${{ secrets.TARGET_PATH }}' ]; then
+              echo '✅ 目录存在'
+              echo '当前内容:'
+              ls -la '${{ secrets.TARGET_PATH }}'
+            else
+              echo '❌ 目录不存在，将创建'
+            fi
+          "
+
+          # 7. 执行 rsync 同步（使用绝对路径）
+          echo '🔄 正在同步文件...'
+          $RSYNC_PATH -avz \
+            --progress \
+            --delete \
+            --stats \
+            ./dist-to-deploy/ \
+            '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/'
+
+          echo '✅ 文件同步命令执行完成'
+
+          # 8. 验证同步结果
+          echo '🔍 验证同步结果...'
+          ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
+            echo '========== 同步验证 =========='
+            echo '目标目录: ${{ secrets.TARGET_PATH }}'
+            echo '文件数量: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
+            echo '目录大小: \$(du -sh ${{ secrets.TARGET_PATH }})'
+            echo '最新文件:'
+            find '${{ secrets.TARGET_PATH }}' -type f -exec ls -lh {} \; | head -5
+            echo '=============================='
+          "
+
+          echo '🎉 文件同步流程完成！'
+      # =============================================
+      - name: Final Server Verification
+        run: |
+          echo '🔍 最终服务器验证...'
+          ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
+            echo '========== 最终验证 =========='
             echo '服务器时间: \$(date)'
             echo '部署目录: ${{ secrets.TARGET_PATH }}'
-            echo '目录大小: \$(du -sh ${{ secrets.TARGET_PATH }})'
-            echo '文件数量: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
-            echo '示例文件:'
-            ls -la '${{ secrets.TARGET_PATH }}' | head -5
+            echo '目录权限:'
+            ls -ld '${{ secrets.TARGET_PATH }}'
+            echo '目录内容:'
+            ls -la '${{ secrets.TARGET_PATH }}'
+            echo '文件列表:'
+            find '${{ secrets.TARGET_PATH }}' -type f | head -10
             echo '=============================='
           "
 
