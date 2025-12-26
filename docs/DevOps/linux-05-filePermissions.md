@@ -6,7 +6,7 @@ title: 文件权限操作相关命令
 
 nav:
   title: DevOps
-  order: 1
+  order: 2
 ---
 
 在 Linux 中，文件权限管理是系统安全的核心功能之一。以下是常用的文件权限相关命令及其用法：
