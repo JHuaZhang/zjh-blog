@@ -17,7 +17,7 @@ nav:
 因为第二种方案不会带来资损，因此我们最终选择第二种方案，具体实现如下。
 
 ## 2、前端技术方案
-我们可以访问PayPal的[开发文档]([https://developer.paypal.com/api/rest](https://developer.paypal.com/api/rest),)，可以看到详细的内容：
+我们可以访问PayPal的[开发文档](https://developer.paypal.com/api/rest/)，可以看到详细的内容：
 
 <!-- 这是一张图片，ocr 内容为： -->
 ![](../images//share/share202610161607.png)
