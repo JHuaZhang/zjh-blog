@@ -14,11 +14,34 @@ nav:
       <div class="welcome-title">欢迎来到建华blog</div>
       <p class="desc">日常学习 & 分享 | 持续更新</p>
       <div class="welcome-buttons">
-        <a href="/docker/01-introduction" class="button primary">开始逛逛</a>
+        <a href="/share/01-beautify-github" class="button primary">开始逛逛</a>
         <a href="https://github.com/JHuaZhang/zjh-blog" target="_blank" class="button outline">GitHub</a>
       </div>
     </div>
   </div>
+  </div>
+    <div class="features-section">
+    <div class="features-container">
+      <div class="feature">
+        <div class="cardTitle"><a href="/type-script/base-01-type-script" class="hrefToPage">TypeScript</a></div>
+        <p>涵盖TypeScript的基础语法和进阶用法以及日常实践。</p>
+      </div>
+      <div class="feature">
+        <div class="cardTitle"><a href="/dev-ops/docker-01-introduction" class="hrefToPage">DevOps</a></div>
+        <div>
+        <p>涵盖DevOps相关知识体系，包括:</p>
+        <div class="list">
+          <div class="list-item"><a href="/dev-ops/docker-01-introduction" class="hrefToPage">Docker</a></div>
+          <div class="list-item"><a href="/dev-ops/linux-01-directory-structure" class="hrefToPage">Linux</a></div>
+          <div class="list-item"><a href="/dev-ops/nginx-01-introduction" class="hrefToPage">Nginx</a></div>
+        </div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="cardTitle"><a href="/share/01-beautify-github" class="hrefToPage">日常分享</a></div>
+        <p>分享一下日常开发遇到的问题以及解决方案 or 一些觉得好玩的内容。</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -104,8 +127,14 @@ nav:
     background: #f5f5f5;
     transform: translateY(-2px);
   }
+
+  .main-section{
+    text-align: center;
+    font-size:25px;
+    font-weight: 900;
+  }
   .features-section {
-    padding: 60px 20px;
+    padding: 0px 20px 50px;
     color: #333;
   }
   .features-container {
@@ -132,6 +161,21 @@ nav:
     color: #666;
     font-size: 0.95rem;
     line-height: 1.6;
+  }
+  .hrefToPage{
+    text-decoration: none;
+    color: #1890ff;
+  }
+  .cardTitle{
+    font-size: 20px;
+  }
+  .list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .list-item{
+    font-size: 16px;
   }
 
   @media (max-width: 768px) {
