@@ -9,8 +9,8 @@ nav:
   order: 2
 ---
 
-## 1、Nginx配置文件结构
-Nginx 配置的核心是定义要处理的 URL 以及如何响应这些 URL 请求，即定义一系列的 虚拟服务器（Virtual Servers） 控制对来自特定域名或者 IP 的请求的处理。每一个虚拟服务器定义一系列的 location 控制处理特定的 URI 集合。每一个 location 定义了对映射到自己的请求的处理场景，可以返回一个文件或者代理此请求。Nginx 的主配置文件通常位于 /etc/nginx/nginx.conf，其结构由多个上下文（context）组成，每个上下文包含若干指令（directives）。
+## 1、nginx配置文件结构
+nginx 配置的核心是定义要处理的 URL 以及如何响应这些 URL 请求，即定义一系列的 虚拟服务器（Virtual Servers） 控制对来自特定域名或者 IP 的请求的处理。每一个虚拟服务器定义一系列的 location 控制处理特定的 URI 集合。每一个 location 定义了对映射到自己的请求的处理场景，可以返回一个文件或者代理此请求。nginx 的主配置文件通常位于 /etc/nginx/nginx.conf，其结构由多个上下文（context）组成，每个上下文包含若干指令（directives）。
 
 **主要上下文（Contexts）：**
 
@@ -47,7 +47,7 @@ http {
 # ================================
 # 1. 全局上下文（Main Context）
 # ================================
-# 运行 Nginx 的用户（Linux 系统用户）
+# 运行 nginx 的用户（Linux 系统用户）
 user nginx;
 
 # 工作进程数：auto 表示等于 CPU 核心数
@@ -109,7 +109,7 @@ http {
   gzip_min_length 1024;             # 小于 1KB 不压缩
   gzip_types text/plain text/css application/json application/javascript;
 
-  # 隐藏 Nginx 版本号（安全加固）
+  # 隐藏 nginx 版本号（安全加固）
   server_tokens off;
 
   # 客户端请求体最大大小（防大文件上传攻击）
@@ -336,7 +336,7 @@ gzip_types text/css application/javascript;
 ```
 
 ### 2.2、指令作用域
-Nginx的指令严格限定作用域。常见指令作用域如下：
+nginx的指令严格限定作用域。常见指令作用域如下：
 
 | 指令 | 允许的上下文 |
 | --- | --- |
@@ -359,10 +359,10 @@ Nginx的指令严格限定作用域。常见指令作用域如下：
 验证方法：使用 nginx -t 测试配置，若指令放错位置会报错。
 
 ### 2.3、变量
-Nginx支持内置变量和自定义变量。
+nginx支持内置变量和自定义变量。
 
 #### 2.3.1、内置变量（以 $ 开头）
-由 Nginx 模块自动提供，反映请求/响应/连接信息。常见内置变量：
+由 nginx 模块自动提供，反映请求/响应/连接信息。常见内置变量：
 
 ```nginx
 $host                # 请求头 Host 字段
@@ -387,7 +387,7 @@ set $is_mobile "";
 变量作用域：继承父上下文，可在 server、location 中定义并传递。
 
 ### 2.4、location匹配规则
-location 是 Nginx 最强大的功能之一，用于匹配请求 URI。
+location 是 nginx 最强大的功能之一，用于匹配请求 URI。
 
 **语法：**
 
@@ -446,7 +446,7 @@ if (condition) {
 
 **注意****⚠️****：**
 
-Nginx 的 if 在 location 中行为不符合直觉，可能导致：
+nginx 的 if 在 location 中行为不符合直觉，可能导致：
 
 + proxy_pass 失效。
 + root 被忽略。
@@ -455,7 +455,7 @@ Nginx 的 if 在 location 中行为不符合直觉，可能导致：
 建议：优先使用多个 location 或 map 替代 if。
 
 ### 2.7、map指令（安全的条件映射）
-map 是 Nginx 提供的一个高效、安全的变量映射机制。它的作用是：
+map 是 nginx 提供的一个高效、安全的变量映射机制。它的作用是：
 
 **根据一个变量的值（如 $http_user_agent），动态生成另一个变量的值（如 $is_mobile）。它不是“修改”原变量，而是创建一个新变量，其值由原变量决定。**
 
@@ -476,9 +476,9 @@ map $http_user_agent $is_mobile：
 
 + $http_user_agent：输入变量（客户端请求头中的 User-Agent 字符串）。
 + $is_mobile：输出变量（自定义的新变量）。
-+ 含义：每当有请求进来，Nginx 会检查 User-Agent，然后自动设置 $is_mobile 为 0 或 1。
++ 含义：每当有请求进来，nginx 会检查 User-Agent，然后自动设置 $is_mobile 为 0 或 1。
 
-$http_user_agent 是 Nginx 自动提供的，$is_mobile 是我们通过 map 定义的。
+$http_user_agent 是 nginx 自动提供的，$is_mobile 是我们通过 map 定义的。
 
 然后使用的时候：
 
@@ -497,7 +497,7 @@ server {
 }
 ```
 
-这样，Nginx 会自动根据设备类型分流！
+这样，nginx 会自动根据设备类型分流！
 
 ### 2.8、错误处理与重定向
 #### 2.8.1、自定义错误页
@@ -528,20 +528,20 @@ rewrite ^/api/v1/(.*)$ /v2/$1 last;     # 内部重写
 
 ## 3、配置详解
 ### 3.1、main全局块
-该部分配置用于设置影响 Nginx 全局的指令，通常包括以下几个部分：
+该部分配置用于设置影响 nginx 全局的指令，通常包括以下几个部分：
 
-+ 配置运行 Nginx 服务器用户（组）。
++ 配置运行 nginx 服务器用户（组）。
 + worker process 数。
-+ Nginx 进程 PID 存放路径。
++ nginx 进程 PID 存放路径。
 + 错误日志的存放路径。
 + 配置文件引入。
 
 ```nginx
-# 配置运行 Nginx 服务器用户（组）
+# 配置运行 nginx 服务器用户（组）
 user root;
 # 错误日志的存放路径
 error_log /var/log/nginx/error.log;
-# Nginx 进程 PID 存放路径
+# nginx 进程 PID 存放路径
 pid /run/nginx.pid;
 # 设置工作进程数量
 worker_process 1;
@@ -550,7 +550,7 @@ include /usr/share/nginx/modules/*.conf;
 ```
 
 #### 3.1.1、user
-指定运行 Nginx 的 woker 子进程的属主和属组，其中组可以不指定。
+指定运行 nginx 的 woker 子进程的属主和属组，其中组可以不指定。
 
 ```nginx
 user <USERNAME> [GROUP]
@@ -559,7 +559,7 @@ user nginx dev;
 ```
 
 #### 3.1.2、pid
-指定运行 Nginx master 主进程的 pid 文件存放路径。
+指定运行 nginx master 主进程的 pid 文件存放路径。
 
 ```nginx
 # master 主进程的的 pid 存放在 nginx.pid 的文件
@@ -585,7 +585,7 @@ working_directory /opt/nginx/tmp;
 ```
 
 #### 3.1.5、worker_processes_number
-指定 Nginx 启动的 worker 子进程数量。
+指定 nginx 启动的 worker 子进程数量。
 
 ```nginx
 # 指定具体子进程数量
@@ -605,7 +605,7 @@ worker_cpu_affinity 0001 0010 0100 1000;
 将每个 worker 子进程与特定 CPU 物理核心绑定，优势在于，避免同一个 worker 子进程在不同的 CPU 核心上切换，缓存失效，降低性能。但其并不能真正的避免进程切换。
 
 #### 3.1.7、worker_priority
-指定 worker 子进程的 nice 值，以调整运行 Nginx 的优先级，通常设定为负值，以优先调用 Nginx。
+指定 worker 子进程的 nice 值，以调整运行 nginx 的优先级，通常设定为负值，以优先调用 nginx。
 
 ```nginx
 # 120-10=110，110 就是最终的优先级
@@ -633,7 +633,7 @@ timer_resolution 100ms;
 在 Linux 系统中，用户需要获取计时器时需要向操作系统内核发送请求，有请求就必然会有开销，因此这个间隔越大开销就越小。
 
 #### 3.1.10、daemon
-指定 Nginx 的运行方式，前台还是后台，前台用于调试，后台用于生产。
+指定 nginx 的运行方式，前台还是后台，前台用于调试，后台用于生产。
 
 ```nginx
 # 默认是 on，后台运行模式
@@ -641,9 +641,9 @@ daemon off;
 ```
 
 ### 3.2、events块
-events 块配置影响 Nginx 服务器或与用户的网络连接。有每个进程的最大连接数，选取哪种事件驱动模型处理连接请求，是否允许同时接受多个网路连接，开启多个网络连接序列化等。
+events 块配置影响 nginx 服务器或与用户的网络连接。有每个进程的最大连接数，选取哪种事件驱动模型处理连接请求，是否允许同时接受多个网路连接，开启多个网络连接序列化等。
 
-该部分配置主要影响 Nginx 服务器与用户的网络连接，主要包括：
+该部分配置主要影响 nginx 服务器与用户的网络连接，主要包括：
 
 + 设置网络连接的序列化。
 + 是否允许同时接收多个网络连接。
@@ -661,10 +661,10 @@ events {
 ```
 
 #### 3.2.1、use
-Nginx 使用何种事件驱动模型。
+nginx 使用何种事件驱动模型。
 
 ```nginx
-# 不推荐配置它，让 Nginx 自己选择
+# 不推荐配置它，让 nginx 自己选择
 use <method>;
 ```
 
@@ -833,7 +833,7 @@ gzip_proxied      any;                    # 对代理请求也压缩
 
 #### 3.3.7、安全与隐私
 ```nginx
-server_tokens off;              # 隐藏 Nginx 版本号（Server: nginx）
+server_tokens off;              # 隐藏 nginx 版本号（Server: nginx）
 add_header X-Frame-Options "SAMEORIGIN" always;    # 防点击劫持
 add_header X-Content-Type-Options "nosniff" always; # 防 MIME 嗅探
 add_header Referrer-Policy "no-referrer-when-downgrade" always;
@@ -876,7 +876,7 @@ include /etc/nginx/sites-enabled/*;     # 虚拟主机（推荐）
 #### 3.3.11、root
 指定静态资源目录位置，它可以写在 http、server、location 块等配置中。
 
-root 与 alias 的区别主要在于 Nginx 如何解释 location 后面的路径的 URI，这会使两者分别以不同的方式将请求映射到服务器文件上。具体来看：
+root 与 alias 的区别主要在于 nginx 如何解释 location 后面的路径的 URI，这会使两者分别以不同的方式将请求映射到服务器文件上。具体来看：
 
 + root 的处理结果是：root 路径 + location 路径。
 + alias 的处理结果是：使用 alias 路径替换 location 路径。
@@ -1006,7 +1006,7 @@ server {
 + 当访问 fe.nginx-test.club 时，会进行正则匹配。
 
 ##### 3.3.12.2、listen的基本作用
-一个 server 块可以有多个 listen 指令，Nginx 会为每个 listen 创建一个监听套接字。
+一个 server 块可以有多个 listen 指令，nginx 会为每个 listen 创建一个监听套接字。
 
 **基本语法：**
 
@@ -1082,11 +1082,11 @@ listen unix:/var/run/nginx.sock;
 ```
 
 + 不通过 TCP，而是通过本地文件系统 socket 通信。
-+ 常用于 Nginx 与 PHP-FPM、本地代理等场景。
++ 常用于 nginx 与 PHP-FPM、本地代理等场景。
 
 **default_server：默认虚拟主机**
 
-当客户端请求的 Host 头不匹配任何 server_name 时，如果有 listen ... default_server;，则使用它。如果没有，Nginx 会使用第一个定义的 server 块（按配置文件顺序）。
+当客户端请求的 Host 头不匹配任何 server_name 时，如果有 listen ... default_server;，则使用它。如果没有，nginx 会使用第一个定义的 server 块（按配置文件顺序）。
 
 ```nginx
 # 默认 server：拒绝未知域名
@@ -1104,7 +1104,7 @@ server {
 }
 ```
 
-return 444; 是 Nginx 特有状态码，表示“关闭连接，不返回任何内容”，常用于安全防护。
+return 444; 是 nginx 特有状态码，表示“关闭连接，不返回任何内容”，常用于安全防护。
 
 ##### 3.3.12.3、return的基本作用
 return 会立即停止当前 location 或 server 的后续处理，直接向客户端返回响应。
@@ -1194,7 +1194,7 @@ location = /api/error {
 
 **特殊状态码：444：**
 
-Nginx 特有状态码：
+nginx 特有状态码：
 
 ```nginx
 return 444;
@@ -1212,7 +1212,7 @@ server {
 ```
 
 ##### 3.3.12.4、location的基本作用
-location 块用于定义：当客户端请求的 URI 匹配某个模式时，Nginx 应该如何处理该请求。
+location 块用于定义：当客户端请求的 URI 匹配某个模式时，nginx 应该如何处理该请求。
 
 例如：
 
@@ -1248,7 +1248,7 @@ location [修饰符] pattern {
 + 不包含查询参数（?a=1 不参与匹配）。
 + pattern 中的 / 是字面量，不是路径分隔符（只是字符串的一部分）。
 
-这是 Nginx 最容易出错的地方！匹配顺序不是按配置文件顺序，而是按以下优先级规则：
+这是 nginx 最容易出错的地方！匹配顺序不是按配置文件顺序，而是按以下优先级规则：
 
 :::color1
 1. **=精确匹配**  
