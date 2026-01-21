@@ -1,7 +1,7 @@
 ---
 group:
   title: Nginx
-order: 4
+order: 5
 title: nginx反向代理
 
 nav:
