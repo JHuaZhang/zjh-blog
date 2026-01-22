@@ -6,7 +6,7 @@ title: nginx目录结构与基本运行原理
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、nginx目录结构

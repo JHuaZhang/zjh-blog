@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 2
 title: TypeScript类型分类
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、ts 类型声明

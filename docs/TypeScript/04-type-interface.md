@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 4
 title: type和interface介绍
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、type(类型别名)介绍

@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 1
 title: TypeScript介绍
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、TypeScript 由来

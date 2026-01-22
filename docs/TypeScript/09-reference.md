@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 9
 title: 三斜杠语法
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、介绍

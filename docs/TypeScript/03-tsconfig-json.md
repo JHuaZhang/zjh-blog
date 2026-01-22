@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 3
 title: tsconfig.json配置
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、介绍

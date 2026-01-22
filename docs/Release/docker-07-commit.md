@@ -6,7 +6,7 @@ title: docker commit创建新镜像及镜像私有化
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、docker commit 命令介绍

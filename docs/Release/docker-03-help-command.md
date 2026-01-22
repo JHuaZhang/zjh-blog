@@ -6,7 +6,7 @@ title: Docker命令-常用帮助启动类命令
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、介绍

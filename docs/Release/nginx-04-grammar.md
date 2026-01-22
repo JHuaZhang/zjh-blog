@@ -6,7 +6,7 @@ title: nginx语法规则
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、nginx配置文件结构

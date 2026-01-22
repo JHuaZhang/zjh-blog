@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 5
 title: 枚举enum
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、介绍

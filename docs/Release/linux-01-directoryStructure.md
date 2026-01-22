@@ -6,7 +6,7 @@ title: Linux的目录结构
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、根目录/

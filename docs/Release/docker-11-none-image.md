@@ -6,7 +6,7 @@ title: 虚悬镜像介绍
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、介绍

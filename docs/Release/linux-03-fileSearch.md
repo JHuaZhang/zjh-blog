@@ -6,7 +6,7 @@ title: 文件查找相关命令
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、which 命令

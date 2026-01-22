@@ -6,7 +6,7 @@ title: Docker容器目录挂载
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、介绍

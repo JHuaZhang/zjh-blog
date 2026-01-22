@@ -6,7 +6,7 @@ title: 容器卷介绍
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、介绍
