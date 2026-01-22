@@ -6,7 +6,7 @@ title: nginx虚拟主机及域名解析
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、nginx虚拟主机介绍

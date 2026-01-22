@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 10
 title: 类型的兼容性&类型保护
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、介绍

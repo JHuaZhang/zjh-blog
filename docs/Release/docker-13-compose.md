@@ -6,7 +6,7 @@ title: docker compose介绍
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 

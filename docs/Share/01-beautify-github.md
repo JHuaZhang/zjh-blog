@@ -3,7 +3,7 @@ title: GitHub首页美化
 order: 1
 nav:
   title: 日常分享
-  order: 3
+  order: 10
 ---
 
 ## 1、介绍

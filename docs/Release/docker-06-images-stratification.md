@@ -6,7 +6,7 @@ title: 镜像的分层概念
 
 nav:
   title: 发布部署
-  order: 2
+  order: 6
 ---
 
 ## 1、介绍

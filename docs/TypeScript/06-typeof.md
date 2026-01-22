@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 6
 title: ts中的typeof
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、介绍

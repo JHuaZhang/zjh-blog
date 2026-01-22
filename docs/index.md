@@ -23,7 +23,7 @@ nav:
     <div class="features-section">
     <div class="features-container">
       <div class="feature">
-        <div class="cardTitle"><a href="/type-script/base-01-type-script" class="hrefToPage">TypeScript</a></div>
+        <div class="cardTitle"><a href="/type-script/01-type-script" class="hrefToPage">TypeScript</a></div>
         <p>涵盖TypeScript的基础语法和进阶用法以及日常实践。</p>
       </div>
       <div class="feature">

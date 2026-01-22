@@ -1,12 +1,10 @@
 ---
-group:
-  title: TypeScript基础
 order: 7
 title: ts中的class类
 
 nav:
   title: TypeScript
-  order: 1
+  order: 5
 ---
 
 ## 1、介绍
