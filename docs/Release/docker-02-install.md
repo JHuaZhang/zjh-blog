@@ -5,7 +5,7 @@ order: 2
 title: Docker安装
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

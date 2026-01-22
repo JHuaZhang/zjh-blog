@@ -5,7 +5,7 @@ order: 5
 title: nginx反向代理
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

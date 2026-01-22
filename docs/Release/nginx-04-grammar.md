@@ -5,7 +5,7 @@ order: 4
 title: nginx语法规则
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

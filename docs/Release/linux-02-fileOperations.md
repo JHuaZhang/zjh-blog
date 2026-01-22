@@ -5,7 +5,7 @@ order: 2
 title: 文件操作相关命令
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

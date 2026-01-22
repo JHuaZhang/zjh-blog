@@ -5,7 +5,7 @@ order: 13
 title: docker compose介绍
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

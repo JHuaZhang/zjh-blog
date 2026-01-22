@@ -5,7 +5,7 @@ order: 6
 title: nginx负载均衡
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

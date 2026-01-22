@@ -5,7 +5,7 @@ order: 6
 title: 镜像的分层概念
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 
