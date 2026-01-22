@@ -5,7 +5,7 @@ order: 2
 title: nginx目录结构与基本运行原理
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

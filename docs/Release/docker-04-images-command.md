@@ -5,7 +5,7 @@ order: 4
 title: Docker命令-常用镜像命令
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

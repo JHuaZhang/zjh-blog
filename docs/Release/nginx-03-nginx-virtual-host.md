@@ -5,7 +5,7 @@ order: 3
 title: nginx虚拟主机及域名解析
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

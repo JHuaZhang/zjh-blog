@@ -5,7 +5,7 @@ order: 7
 title: docker commit创建新镜像及镜像私有化
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

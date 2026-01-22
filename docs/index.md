@@ -27,13 +27,13 @@ nav:
         <p>涵盖TypeScript的基础语法和进阶用法以及日常实践。</p>
       </div>
       <div class="feature">
-        <div class="cardTitle"><a href="/dev-ops/docker-01-introduction" class="hrefToPage">DevOps</a></div>
+        <div class="cardTitle"><a href="/release/docker-01-introduction" class="hrefToPage">发布部署</a></div>
         <div>
-        <p>涵盖DevOps相关知识体系，包括:</p>
+        <p>涵盖发布部署相关知识体系，包括:</p>
         <div class="list">
-          <div class="list-item"><a href="/dev-ops/docker-01-introduction" class="hrefToPage">Docker</a></div>
-          <div class="list-item"><a href="/dev-ops/linux-01-directory-structure" class="hrefToPage">Linux</a></div>
-          <div class="list-item"><a href="/dev-ops/nginx-01-introduction" class="hrefToPage">Nginx</a></div>
+          <div class="list-item"><a href="/release/docker-01-introduction" class="hrefToPage">Docker</a></div>
+          <div class="list-item"><a href="/release/linux-01-directory-structure" class="hrefToPage">Linux</a></div>
+          <div class="list-item"><a href="/release/nginx-01-introduction" class="hrefToPage">Nginx</a></div>
         </div>
         </div>
       </div>

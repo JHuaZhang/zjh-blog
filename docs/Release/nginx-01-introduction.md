@@ -5,7 +5,7 @@ order: 1
 title: nginx介绍及安装
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

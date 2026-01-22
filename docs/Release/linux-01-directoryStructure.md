@@ -5,7 +5,7 @@ order: 1
 title: Linux的目录结构
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 

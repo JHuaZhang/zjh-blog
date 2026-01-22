@@ -5,7 +5,7 @@ order: 11
 title: 虚悬镜像介绍
 
 nav:
-  title: DevOps
+  title: 发布部署
   order: 2
 ---
 
