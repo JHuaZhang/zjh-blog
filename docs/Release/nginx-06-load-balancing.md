@@ -194,7 +194,7 @@ touch nginx.conf
 vim nginx.conf
 ```
 
-	内容为：
+内容为：
 
 ```nginx
 events {
