@@ -277,7 +277,7 @@ message: |
   </p>
 ```
 
-	转成js为：
+转成js为：
 
 ```javascript
 { message: '<p style="color: red">\n  段落\n</p>\n' }
@@ -332,7 +332,7 @@ test:
   host:     localhost
 ```
 
-	& 用来建立锚点（defaults），<< 表示合并到当前数据，***** 用来引用锚点。
+& 用来建立锚点（defaults），<< 表示合并到当前数据，***** 用来引用锚点。
 
 ```yaml
 - &showell Steve 
@@ -348,5 +348,5 @@ test:
 [ 'Steve', 'Clark', 'Brian', 'Oren', 'Steve' ]
 ```
 
-	这里只是做简单的了解，熟悉了这些基本用法，后续配置一些流水线就能得心应手了。
+这里只是做简单的了解，熟悉了这些基本用法，后续配置一些流水线就能得心应手了。
 
