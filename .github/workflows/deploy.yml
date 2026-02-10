@@ -76,76 +76,76 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  deploy-to-server:
-    needs: build
-    runs-on: ubuntu-latest
-    concurrency: deploy-to-server
-    steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: site-dist
-          path: ./dist-to-deploy
+  # deploy-to-server:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   concurrency: deploy-to-server
+  #   steps:
+  #     - name: Download Build Artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: site-dist
+  #         path: ./dist-to-deploy
 
-      - name: Verify Downloaded Files
-        run: |
-          echo '📦 已下载构建产物'
-          echo "文件数量：$(find ./dist-to-deploy -type f | wc -l)"
+  #     - name: Verify Downloaded Files
+  #       run: |
+  #         echo '📦 已下载构建产物'
+  #         echo "文件数量：$(find ./dist-to-deploy -type f | wc -l)"
 
-      - name: Setup SSH Connection
-        run: |
-          mkdir -p ~/.ssh
-          echo '${{ secrets.SSH_PRIVATE_KEY }}' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H '${{ secrets.SERVER_HOST }}' >> ~/.ssh/known_hosts
+  #     - name: Setup SSH Connection
+  #       run: |
+  #         mkdir -p ~/.ssh
+  #         echo '${{ secrets.SSH_PRIVATE_KEY }}' > ~/.ssh/id_rsa
+  #         chmod 600 ~/.ssh/id_rsa
+  #         ssh-keyscan -H '${{ secrets.SERVER_HOST }}' >> ~/.ssh/known_hosts
 
-      - name: Deploy with scp
-        run: |
-          echo '🚀 开始使用 scp 同步文件到服务器...'
-          echo "目标路径：${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}"
+  #     - name: Deploy with scp
+  #       run: |
+  #         echo '🚀 开始使用 scp 同步文件到服务器...'
+  #         echo "目标路径：${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}"
 
-          # 1. 清理服务器目标目录（确保干净）
-          echo '🧹 清理服务器目标目录...'
-          ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
-            # 删除目标目录中的所有内容，但保留目录本身
-            if [ -d '${{ secrets.TARGET_PATH }}' ]; then
-              rm -rf '${{ secrets.TARGET_PATH }}'/*
-              echo '✅ 目标目录已清空'
-            else
-              mkdir -p '${{ secrets.TARGET_PATH }}'
-              echo '✅ 目标目录已创建'
-            fi
-          "
+  #         # 1. 清理服务器目标目录（确保干净）
+  #         echo '🧹 清理服务器目标目录...'
+  #         ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
+  #           # 删除目标目录中的所有内容，但保留目录本身
+  #           if [ -d '${{ secrets.TARGET_PATH }}' ]; then
+  #             rm -rf '${{ secrets.TARGET_PATH }}'/*
+  #             echo '✅ 目标目录已清空'
+  #           else
+  #             mkdir -p '${{ secrets.TARGET_PATH }}'
+  #             echo '✅ 目标目录已创建'
+  #           fi
+  #         "
 
-          # 2. 使用 scp 递归复制整个目录
-          echo '📤 正在上传文件到服务器...'
-          scp -r ./dist-to-deploy/* '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/'
+  #         # 2. 使用 scp 递归复制整个目录
+  #         echo '📤 正在上传文件到服务器...'
+  #         scp -r ./dist-to-deploy/* '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.TARGET_PATH }}/'
 
-          echo '✅ 文件传输完成！'
+  #         echo '✅ 文件传输完成！'
 
-          # 3. 验证传输结果
-          echo '🔍 验证传输结果...'
-          ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
-            echo '========== 传输验证 =========='
-            echo '目标目录: ${{ secrets.TARGET_PATH }}'
-            echo '传输的文件数量: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
-            echo '目录大小: \$(du -sh ${{ secrets.TARGET_PATH }})'
-            echo '前5个文件:'
-            find '${{ secrets.TARGET_PATH }}' -type f | head -5
-            echo '=============================='
-          "
-      # =============================================
-      - name: Final Server Verification
-        run: |
-          echo '🔍 最终服务器验证...'
-          ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
-            echo '========== 最终验证 =========='
-            echo '服务器时间: \$(date)'
-            echo '部署目录: ${{ secrets.TARGET_PATH }}'
-            echo '完整文件列表:'
-            ls -la '${{ secrets.TARGET_PATH }}' | head -15
-            echo '总文件数: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
-            echo '=============================='
-          "
+  #         # 3. 验证传输结果
+  #         echo '🔍 验证传输结果...'
+  #         ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
+  #           echo '========== 传输验证 =========='
+  #           echo '目标目录: ${{ secrets.TARGET_PATH }}'
+  #           echo '传输的文件数量: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
+  #           echo '目录大小: \$(du -sh ${{ secrets.TARGET_PATH }})'
+  #           echo '前5个文件:'
+  #           find '${{ secrets.TARGET_PATH }}' -type f | head -5
+  #           echo '=============================='
+  #         "
+  #     # =============================================
+  #     - name: Final Server Verification
+  #       run: |
+  #         echo '🔍 最终服务器验证...'
+  #         ssh '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' "
+  #           echo '========== 最终验证 =========='
+  #           echo '服务器时间: \$(date)'
+  #           echo '部署目录: ${{ secrets.TARGET_PATH }}'
+  #           echo '完整文件列表:'
+  #           ls -la '${{ secrets.TARGET_PATH }}' | head -15
+  #           echo '总文件数: \$(find ${{ secrets.TARGET_PATH }} -type f | wc -l)'
+  #           echo '=============================='
+  #         "
 
-          echo '🎉 部署完成！'
+  #         echo '🎉 部署完成！'
