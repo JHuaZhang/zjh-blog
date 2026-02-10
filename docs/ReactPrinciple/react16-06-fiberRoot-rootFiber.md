@@ -1,7 +1,7 @@
 ---
 group:
   title: React16原理
-order: 5
+order: 6
 title: FiberRoot和RootFiber
 
 nav:
