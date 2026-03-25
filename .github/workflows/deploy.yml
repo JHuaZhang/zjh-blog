@@ -32,7 +32,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
       - name: Build Documentation Site
-        run: pnpm run docs:build-site
+        run: pnpm run build:site
       - name: Clean Invalid Filenames
         run: |
           echo "🔧 清理文件名中的冒号..."
