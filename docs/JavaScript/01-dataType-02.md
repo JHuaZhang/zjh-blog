@@ -107,28 +107,70 @@ console.log(1 instanceof Number); // false
 console.log(true instanceof Boolean); // false
 ```
 
-### 3.3 `instanceof` 的原理
+### 3.3 `instanceof` 的原理（重要澄清）
 
-`instanceof` 的原理基于**原型链查找**。当执行 `obj instanceof Constructor` 时，引擎执行以下步骤：
+#### 常见误解澄清
+
+- ❌ **误解1**：`instanceof` 检查实例的原型上是否有 `Array` 这个属性。  
+  ✅ **事实**：`[]` 的原型（`__proto__`）指向 `Array.prototype` 对象，该对象上并没有一个叫 `Array` 的属性。`Array` 是构造函数，不是原型上的属性。
+
+- ❌ **误解2**：`instanceof` 依赖原型上的 `constructor` 属性。  
+  ✅ **事实**：`constructor` 只是原型上的一个普通属性，指向构造函数本身。删除它不会影响 `instanceof` 的结果。
+
+#### 具体执行步骤
+
+当执行 `obj instanceof Constructor` 时，引擎执行以下算法：
 
 1. 获取 `Constructor.prototype` 的值。
 2. 获取 `obj` 的内部 `[[Prototype]]`（即 `obj.__proto__`）。
 3. 循环遍历原型链：
    - 如果当前 `[[Prototype]]` 为 `null`，返回 `false`。
-   - 如果当前 `[[Prototype]]` 等于 `Constructor.prototype`，返回 `true`。
-   - 否则，将当前 `[[Prototype]]` 设置为其自身的原型，继续循环。
+   - 如果当前 `[[Prototype]]` **全等于** `Constructor.prototype`，返回 `true`。
+   - 否则，将当前 `[[Prototype]]` 设置为它的原型，继续循环。
 
-因此，`instanceof` 判断的是**整个原型链**上是否存在目标构造函数的 `prototype`。这也意味着，如果修改了原型链，结果可能改变。
+**关键点**：比较的是**对象引用**，而不是属性名或属性值。
+
+#### 图解原型链关系
+
+```
+       +---------------------+
+       |   Array (构造函数)   |
+       |                     |
+       |  .prototype --------+----->  +------------------+
+       +---------------------+         | Array.prototype  | <--- 这就是 [] 的原型
+                                       |                  |
+                                       |  .constructor ----+-----> Array (构造函数)
+                                       |  .push, .map...   |
+                                       +------------------+
+                                              ^
+                                              |
+                                      [] 的 __proto__ 指向这里
+```
+
+#### 代码验证
 
 ```javascript
-function A() {}
-function B() {}
-const obj = new A();
-console.log(obj instanceof A); // true
-console.log(obj instanceof B); // false
-Object.setPrototypeOf(obj, B.prototype);
-console.log(obj instanceof B); // true（原型链已改变）
+const arr = [];
+
+// 1. instanceof 的本质：比较原型链上的对象引用
+console.log(Object.getPrototypeOf(arr) === Array.prototype); // true
+console.log(arr instanceof Array); // true
+
+// 2. 原型上并没有一个叫 "Array" 的属性
+console.log('Array' in arr.__proto__); // false
+
+// 3. 原型上确实有一个 constructor 属性指向 Array
+console.log(arr.__proto__.constructor === Array); // true
+
+// 4. 即使删除 constructor，instanceof 依然为 true
+delete Array.prototype.constructor;
+console.log(arr instanceof Array); // 依然是 true
+// 证明 instanceof 不依赖 constructor 属性
 ```
+
+#### 为什么 `[]` 的原型是 `Array.prototype`？
+
+当你创建一个数组字面量 `[]` 时，JavaScript 内部会调用 `new Array()` 构造器，并将新对象的 `[[Prototype]]` 设置为 `Array.prototype`。因此所有数组实例都共享同一个原型对象。
 
 ### 3.4 注意：`null` 和 `undefined` 不能使用 `instanceof`
 
@@ -139,14 +181,7 @@ console.log(undefined instanceof Object); // false
 
 > `null` 和 `undefined` 没有构造函数，因此 `instanceof` 始终返回 `false`，不会报错。但直接对 `null` 或 `undefined` 使用 `instanceof` 是合法的，只是结果固定为 `false`。
 
-### 3.5 `instanceof` 与基本类型的包装
-
-```javascript
-console.log(new Number(1) == 1); // true（== 会进行类型转换）
-console.log(new Number(1) === 1); // false（类型不同）
-```
-
-### 3.6 `instanceof` 判断不准的情况
+### 3.5 `instanceof` 判断不准的情况
 
 - **跨框架/跨窗口（iframe）问题**：不同执行环境（如不同 `<iframe>`）拥有独立的全局对象和构造函数。例如，一个数组在父窗口创建，传入子窗口后，`childArray instanceof parent.Array` 为 `false`，因为原型链不相等。同理，`instanceof` 在多个全局环境之间会失效。
 - **原型链被动态修改**：如果通过 `Object.setPrototypeOf` 或直接修改 `__proto__` 改变了对象的原型链，`instanceof` 的结果会随之改变，可能不符合原始预期。
@@ -331,3 +366,242 @@ console.log(Array.isArray(null)); // false
 ```
 
 这是目前检测数组最简洁可靠的方式。`Array.isArray` 能正确区分跨窗口的数组，且不受 `Symbol.toStringTag` 影响（除非恶意修改）。
+
+---
+
+## 8. TypeScript 中的类型检测封装实践
+
+在前端项目中，我们经常需要封装一套类型检测工具，以便在 TypeScript 中获得更好的类型推断和代码提示。下面是一套完整的 TypeScript 实现，利用 `Object.prototype.toString` 作为底层检测，并提供了类型守卫、常量定义和常用快捷方法。
+
+```typescript
+/**
+ * ============================================================================
+ * 1. 类型常量定义 (The Source of Truth)
+ * ============================================================================
+ * 使用 as const 确保值是字面量类型，而不是宽泛的 string。
+ * 这样在使用 TYPE_NAMES.ARRAY 时，TS 知道它确切是 "Array" 而不是 string。
+ */
+export const TYPE_NAMES = {
+  // 基本类型
+  STRING: 'String',
+  NUMBER: 'Number',
+  BOOLEAN: 'Boolean',
+  NULL: 'Null',
+  UNDEFINED: 'Undefined',
+  SYMBOL: 'Symbol',
+  BIGINT: 'BigInt',
+
+  // 引用类型 - 基础
+  OBJECT: 'Object',
+  ARRAY: 'Array',
+  FUNCTION: 'Function',
+
+  // 引用类型 - 日期/正则/错误
+  DATE: 'Date',
+  REGEXP: 'RegExp',
+  ERROR: 'Error',
+
+  // 具体错误类型 (可选，根据需要开启)
+  EVAL_ERROR: 'EvalError',
+  RANGE_ERROR: 'RangeError',
+  REFERENCE_ERROR: 'ReferenceError',
+  SYNTAX_ERROR: 'SyntaxError',
+  TYPE_ERROR: 'TypeError',
+  URI_ERROR: 'URIError',
+
+  // 引用类型 - 集合
+  MAP: 'Map',
+  SET: 'Set',
+  WEAK_MAP: 'WeakMap',
+  WEAK_SET: 'WeakSet',
+
+  // 引用类型 - 异步/迭代
+  PROMISE: 'Promise',
+  GENERATOR: 'Generator',
+  GENERATOR_FUNCTION: 'GeneratorFunction',
+  ASYNC_FUNCTION: 'AsyncFunction',
+
+  // 引用类型 - 二进制数据 (TypedArrays)
+  INT8_ARRAY: 'Int8Array',
+  UINT8_ARRAY: 'Uint8Array',
+  UINT8_CLAMPED_ARRAY: 'Uint8ClampedArray',
+  INT16_ARRAY: 'Int16Array',
+  UINT16_ARRAY: 'Uint16Array',
+  INT32_ARRAY: 'Int32Array',
+  UINT32_ARRAY: 'Uint32Array',
+  FLOAT32_ARRAY: 'Float32Array',
+  FLOAT64_ARRAY: 'Float64Array',
+  BIG_INT64_ARRAY: 'BigInt64Array',
+  BIG_UINT64_ARRAY: 'BigUint64Array',
+
+  // 引用类型 - 缓冲区
+  ARRAY_BUFFER: 'ArrayBuffer',
+  SHARED_ARRAY_BUFFER: 'SharedArrayBuffer',
+  DATA_VIEW: 'DataView',
+} as const;
+
+/**
+ * 从常量对象中提取出所有的值类型联合
+ * 结果类似: "String" | "Number" | "Array" | ...
+ */
+export type TypeName = (typeof TYPE_NAMES)[keyof typeof TYPE_NAMES];
+
+/**
+ * ============================================================================
+ * 2. 类型映射 (Type Mapping)
+ * ============================================================================
+ * 将字符串类型映射回具体的 TypeScript 类型，用于 isType 的类型守卫
+ */
+type TypeMap = {
+  [TYPE_NAMES.STRING]: string;
+  [TYPE_NAMES.NUMBER]: number;
+  [TYPE_NAMES.BOOLEAN]: boolean;
+  [TYPE_NAMES.NULL]: null;
+  [TYPE_NAMES.UNDEFINED]: undefined;
+  [TYPE_NAMES.SYMBOL]: symbol;
+  [TYPE_NAMES.BIGINT]: bigint;
+
+  [TYPE_NAMES.ARRAY]: unknown[];
+  [TYPE_NAMES.OBJECT]: Record<PropertyKey, unknown>;
+  [TYPE_NAMES.FUNCTION]: Function;
+
+  [TYPE_NAMES.DATE]: Date;
+  [TYPE_NAMES.REGEXP]: RegExp;
+  [TYPE_NAMES.ERROR]: Error;
+
+  [TYPE_NAMES.MAP]: Map<unknown, unknown>;
+  [TYPE_NAMES.SET]: Set<unknown>;
+  [TYPE_NAMES.WEAK_MAP]: WeakMap<object, unknown>;
+  [TYPE_NAMES.WEAK_SET]: WeakSet<object>;
+
+  [TYPE_NAMES.PROMISE]: Promise<unknown>;
+
+  // Typed Arrays 映射
+  [TYPE_NAMES.INT8_ARRAY]: Int8Array;
+  [TYPE_NAMES.UINT8_ARRAY]: Uint8Array;
+  [TYPE_NAMES.UINT8_CLAMPED_ARRAY]: Uint8ClampedArray;
+  [TYPE_NAMES.INT16_ARRAY]: Int16Array;
+  [TYPE_NAMES.UINT16_ARRAY]: Uint16Array;
+  [TYPE_NAMES.INT32_ARRAY]: Int32Array;
+  [TYPE_NAMES.UINT32_ARRAY]: Uint32Array;
+  [TYPE_NAMES.FLOAT32_ARRAY]: Float32Array;
+  [TYPE_NAMES.FLOAT64_ARRAY]: Float64Array;
+  [TYPE_NAMES.BIG_INT64_ARRAY]: BigInt64Array;
+  [TYPE_NAMES.BIG_UINT64_ARRAY]: BigUint64Array;
+
+  [TYPE_NAMES.ARRAY_BUFFER]: ArrayBuffer;
+  [TYPE_NAMES.SHARED_ARRAY_BUFFER]: SharedArrayBuffer;
+  [TYPE_NAMES.DATA_VIEW]: DataView;
+
+  // 其他未明确映射的默认返回 unknown
+  [key: string]: unknown;
+};
+
+/**
+ * ============================================================================
+ * 3. 核心检测函数
+ * ============================================================================
+ */
+
+/**
+ * 获取任意值的精确原生类型字符串
+ * @example
+ * getType([]) // "Array"
+ * getType(null) // "Null"
+ */
+export function getType(target: unknown): TypeName {
+  return Object.prototype.toString.call(target).slice(8, -1) as TypeName;
+}
+
+/**
+ * 类型守卫：判断目标是否属于指定类型
+ *
+ * @param target - 待检测的目标
+ * @param typeName - 使用 TYPE_NAMES 中的常量，如 TYPE_NAMES.ARRAY
+ * @returns boolean，且在 true 分支中自动缩小 target 的类型
+ *
+ * @example
+ * if (isType(val, TYPE_NAMES.ARRAY)) {
+ *   val.push(1); // TS 知道 val 是 unknown[]
+ * }
+ */
+export function isType<T extends TypeName>(target: unknown, typeName: T): target is TypeMap[T] {
+  return getType(target) === typeName;
+}
+
+/**
+ * ============================================================================
+ * 4. 常用快捷方法 (Syntactic Sugar)
+ * ============================================================================
+ * 为了方便日常使用，提供一些不需要传参的快捷判断
+ */
+
+export const isString = (val: unknown): val is string => getType(val) === TYPE_NAMES.STRING;
+export const isNumber = (val: unknown): val is number => getType(val) === TYPE_NAMES.NUMBER;
+export const isBoolean = (val: unknown): val is boolean => getType(val) === TYPE_NAMES.BOOLEAN;
+export const isNull = (val: unknown): val is null => getType(val) === TYPE_NAMES.NULL;
+export const isUndefined = (val: unknown): val is undefined =>
+  getType(val) === TYPE_NAMES.UNDEFINED;
+export const isSymbol = (val: unknown): val is symbol => getType(val) === TYPE_NAMES.SYMBOL;
+export const isBigInt = (val: unknown): val is bigint => getType(val) === TYPE_NAMES.BIGINT;
+
+export const isArray = (val: unknown): val is unknown[] => getType(val) === TYPE_NAMES.ARRAY;
+export const isObject = (val: unknown): val is Record<PropertyKey, unknown> =>
+  getType(val) === TYPE_NAMES.OBJECT;
+export const isFunction = (val: unknown): val is Function => getType(val) === TYPE_NAMES.FUNCTION;
+
+export const isDate = (val: unknown): val is Date => getType(val) === TYPE_NAMES.DATE;
+export const isRegExp = (val: unknown): val is RegExp => getType(val) === TYPE_NAMES.REGEXP;
+export const isError = (val: unknown): val is Error => getType(val) === TYPE_NAMES.ERROR;
+
+export const isPromise = (val: unknown): val is Promise<unknown> =>
+  getType(val) === TYPE_NAMES.PROMISE;
+export const isMap = (val: unknown): val is Map<unknown, unknown> =>
+  getType(val) === TYPE_NAMES.MAP;
+export const isSet = (val: unknown): val is Set<unknown> => getType(val) === TYPE_NAMES.SET;
+
+// 判断是否为空值 (null 或 undefined)
+export const isNil = (val: unknown): val is null | undefined => val === null || val === undefined;
+
+// 判断是否为空对象或空数组
+export const isEmpty = (val: unknown): boolean => {
+  if (isNil(val)) return true;
+  if (isArray(val) || isString(val)) return val.length === 0;
+  if (isObject(val)) return Object.keys(val).length === 0;
+  if (isMap(val) || isSet(val)) return val.size === 0;
+  return false;
+};
+```
+
+### 8.1 设计亮点
+
+- **类型常量 `as const`**：确保每个类型名称都是字面量类型，避免宽泛的 `string`，便于 TypeScript 进行精确类型推断。
+- **类型映射 `TypeMap`**：将字符串类型名称映射为实际的 TypeScript 类型，用于 `isType` 守卫，让类型自动缩小。
+- **类型守卫 `isType`**：通过泛型参数和返回类型 `target is TypeMap[T]`，实现精确的类型保护。
+- **快捷方法**：提供常用的 `isArray`、`isObject` 等，减少重复代码，提升可读性。
+- **空值处理**：`isNil` 和 `isEmpty` 覆盖了常见场景，避免重复判断。
+
+### 8.2 使用示例
+
+```typescript
+import { isType, TYPE_NAMES, isArray, isEmpty } from './type-guards';
+
+function process(data: unknown) {
+  if (isType(data, TYPE_NAMES.ARRAY)) {
+    // data 被推断为 unknown[]
+    data.push(1);
+  }
+
+  if (isArray(data)) {
+    // 同样推断为 unknown[]
+    console.log(data.length);
+  }
+
+  if (isEmpty(data)) {
+    // 处理空值、空数组、空对象、空 Set/Map
+    console.log('数据为空');
+  }
+}
+```
+
+这套工具函数可以直接用于项目，提供可靠且类型安全的类型检测能力。
