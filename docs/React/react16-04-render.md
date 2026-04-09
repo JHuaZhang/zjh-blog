@@ -1,12 +1,13 @@
 ---
 group:
   title: React16原理
+  order: 100
 order: 4
 title: render函数链路初步梳理
 
 nav:
-  title: React原理
-  order: 4
+  title: React
+  order: 3
 ---
 
 ## 1、介绍

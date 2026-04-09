@@ -1,12 +1,13 @@
 ---
 group:
   title: React16原理
+  order: 100
 order: 2
 title: jsx本质及createElement将jsx转为ReactElement
 
 nav:
-  title: React原理
-  order: 4
+  title: React
+  order: 3
 ---
 
 ## 1、介绍

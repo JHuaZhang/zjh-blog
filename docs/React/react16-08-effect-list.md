@@ -1,12 +1,13 @@
 ---
 group:
   title: React16原理
+  order: 100
 order: 8
 title: Effect List副作用链表剖析
 
 nav:
-  title: React原理
-  order: 4
+  title: React
+  order: 3
 ---
 
 

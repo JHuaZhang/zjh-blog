@@ -1,12 +1,13 @@
 ---
 group:
   title: React16原理
+  order: 100
 order: 6
 title: FiberRoot和RootFiber
 
 nav:
-  title: React原理
-  order: 4
+  title: React
+  order: 3
 ---
 
 
