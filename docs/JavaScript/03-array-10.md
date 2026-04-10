@@ -3,7 +3,7 @@ group:
   title: 【03】js数组及数组方法
   order: 3
 order: 10
-title: 组深浅拷贝方法
+title: 数组深浅拷贝方法
 nav:
   title: JavaScript
   order: 2
