@@ -15,32 +15,62 @@ nav:
       <p class="desc">日常学习 & 分享 | 持续更新</p>
       <div class="welcome-buttons">
         <a href="/share/01-beautify-github" class="button primary">开始逛逛</a>
-        <a href="https://github.com/JHuaZhang/zjh-blog" target="_blank" class="button outline">GitHub</a>
+        <a href="https://github.com/JHuaZhang/zjh-blog" target="_blank" class="button outline"
+          >GitHub</a
+        >
       </div>
     </div>
   </div>
-  </div>
-    <div class="features-section">
-    <div class="features-container">
-      <div class="feature">
-        <div class="cardTitle"><a href="/type-script/01-type-script" class="hrefToPage">TypeScript</a></div>
-        <p>涵盖TypeScript的基础语法和进阶用法以及日常实践。</p>
+</div>
+
+<!-- 特性/分类展示区域 -->
+<div class="features-section">
+  <div class="features-container">
+    <!-- 卡片: JavaScript -->
+    <div class="feature">
+      <div class="cardTitle">
+        <a href="/java-script/01-data-type-01" class="hrefToPage">JavaScript</a>
       </div>
-      <div class="feature">
-        <div class="cardTitle"><a href="/release/docker-01-introduction" class="hrefToPage">发布部署</a></div>
-        <div>
-        <p>涵盖发布部署相关知识体系，包括:</p>
-        <div class="list">
-          <div class="list-item"><a href="/release/docker-01-introduction" class="hrefToPage">Docker</a></div>
-          <div class="list-item"><a href="/release/linux-01-directory-structure" class="hrefToPage">Linux</a></div>
-          <div class="list-item"><a href="/release/nginx-01-introduction" class="hrefToPage">Nginx</a></div>
+      <p>主要内容为 JavaScript 的基础语法和进阶用法以及日常实践。</p>
+    </div>
+    <!-- 卡片: React -->
+    <div class="feature">
+      <div class="cardTitle">
+        <a href="/react/base-01" class="hrefToPage">React</a>
+      </div>
+      <p>主要内容为React及React原理</p>
+    </div>
+    <!-- 卡片: TypeScript -->
+    <div class="feature">
+      <div class="cardTitle">
+        <a href="/type-script/01-type-script" class="hrefToPage">TypeScript</a>
+      </div>
+      <p>涵盖 TypeScript 的基础语法和进阶用法以及日常实践。</p>
+    </div>
+    <!-- 卡片: 发布部署 -->
+    <div class="feature">
+      <div class="cardTitle">
+        <a href="/release/docker-01-introduction" class="hrefToPage">发布部署</a>
+      </div>
+      <p>涵盖发布部署相关知识体系：</p>
+      <div class="list">
+        <div class="list-item">
+          <a href="/release/docker-01-introduction" class="hrefToPage">Docker</a>
         </div>
+        <div class="list-item">
+          <a href="/release/linux-01-directory-structure" class="hrefToPage">Linux</a>
+        </div>
+        <div class="list-item">
+          <a href="/release/nginx-01-introduction" class="hrefToPage">Nginx</a>
         </div>
       </div>
-      <div class="feature">
-        <div class="cardTitle"><a href="/share/01-beautify-github" class="hrefToPage">日常分享</a></div>
-        <p>分享一下日常开发遇到的问题以及解决方案 or 一些觉得好玩的内容。</p>
+    </div>
+    <!-- 卡片: 日常分享 -->
+    <div class="feature">
+      <div class="cardTitle">
+        <a href="/share/01-beautify-github" class="hrefToPage">日常分享</a>
       </div>
+      <p>分享一下日常开发遇到的问题以及解决方案，或一些觉得好玩的内容。</p>
     </div>
   </div>
 </div>
@@ -140,7 +170,6 @@ nav:
   .features-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 32px;
     max-width: 1200px;
     margin: 0 auto;
