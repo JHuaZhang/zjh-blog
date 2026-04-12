@@ -55,18 +55,39 @@ for (let key in person) console.log(key); // 仅输出 'name'
 
 ---
 
-## 2. 属性描述符
+## 2. 原理
+
+`Object.defineProperty` 的底层行为由 JavaScript 引擎实现，遵循 ECMAScript 规范中定义的 **`[[DefineOwnProperty]]`** 内部方法。大致流程如下：
+
+1. **类型转换**：将 `obj` 转换为对象类型（如果传入原始值，会先进行装箱）。
+2. **描述符验证**：检查 `descriptor` 是否合法，例如不能同时包含 `value`/`writable` 和 `get`/`set`；如果 `configurable` 为 `false`，则限制后续修改。
+3. **调用内部方法**：引擎调用对象内部的 `[[DefineOwnProperty]]` 方法，传入属性名 `prop` 和经过标准化的描述符。
+4. **更新属性表**：
+   - 如果属性不存在，则在对象的**自身属性表**中添加新属性，并存储描述符信息。
+   - 如果属性已存在，则根据描述符的 `configurable` 和新的描述符内容决定是否允许修改，允许则更新属性表。
+5. **返回对象**：操作成功后返回原对象 `obj`（如果操作失败，在严格模式下抛出 `TypeError`，非严格模式下静默失败）。
+
+**关键点**：
+
+- 属性描述符被存储在对象内部，与属性值分开管理。
+- 不可配置（`configurable: false`）的属性无法被删除，也无法从数据属性转换为存取属性或反之，但 `writable` 可以从 `true` 改为 `false`。
+- 该方法只影响对象的自身属性，不会修改原型链上的同名属性。
+- 使用 `Object.defineProperty` 多次定义同一属性时，后一次调用会覆盖前一次的描述符（受 `configurable` 限制）。
+
+---
+
+## 3. 属性描述符
 
 属性描述符分为两类：**数据描述符**和**存取描述符**。两者不能混用（即不能同时设置 `value`/`writable` 和 `get`/`set`）。
 
-### 2.1 数据描述符
+### 3.1 数据描述符
 
 - **`value`**：属性的值，默认为 `undefined`。
 - **`writable`**：布尔值，确定属性是否可以被赋值运算符（`=`）改变。默认为 `false`。
 - **`enumerable`**：布尔值，确定属性是否可枚举（即是否出现在 `for...in` 或 `Object.keys` 中）。默认为 `false`。
 - **`configurable`**：布尔值，确定是否可删除属性，以及是否可更改属性类型或修改非 `value` 的描述符。默认为 `false`。
 
-### 2.2 存取描述符
+### 3.2 存取描述符
 
 - **`get`**：读取属性时调用的函数，返回值作为属性值。默认为 `undefined`。
 - **`set`**：写入属性时调用的函数，接收一个参数（新值）。默认为 `undefined`。
@@ -76,9 +97,9 @@ for (let key in person) console.log(key); // 仅输出 'name'
 
 ---
 
-## 3. 基本用法示例
+## 4. 基本用法示例
 
-### 3.1 定义新属性或修改属性
+### 4.1 定义新属性或修改属性
 
 ```javascript
 const obj = { name: '张三' };
@@ -99,7 +120,7 @@ Object.defineProperty(obj, 'age', {
 console.log(obj); // { name: '张三', age: 20 }
 ```
 
-### 3.2 `writable` 属性
+### 4.2 `writable` 属性
 
 控制属性是否可以被赋值运算符修改。
 
@@ -120,7 +141,7 @@ Object.defineProperty(obj, 'sex', { value: '女' });
 console.log(obj.sex); // '女'
 ```
 
-### 3.3 `enumerable` 属性
+### 4.3 `enumerable` 属性
 
 控制属性是否出现在枚举中。
 
@@ -144,7 +165,7 @@ for (let key in obj) {
 // 内置属性（如 constructor）不可枚举，因为它们的 enumerable 为 false
 ```
 
-### 3.4 `configurable` 属性
+### 4.4 `configurable` 属性
 
 控制属性是否可删除，以及是否可修改描述符（除 `writable` 从 `true` 改为 `false` 外，其他修改通常受限）。
 
@@ -164,7 +185,7 @@ console.log(obj.sex); // '男'
 // Object.defineProperty(obj, 'sex', { value: '女' }); // TypeError
 ```
 
-### 3.5 存取描述符（getter/setter）
+### 4.5 存取描述符（getter/setter）
 
 使用 `get` 和 `set` 可以定义计算属性，并执行额外逻辑。
 
@@ -193,19 +214,19 @@ console.log(obj.property); // getter 被调用，输出 5
 
 ---
 
-## 4. 实际应用场景
+## 5. 实际应用场景
 
-### 4.1 数据劫持与响应式系统（Vue 2 原理详解）
+### 5.1 数据劫持与响应式系统（Vue 2 原理详解）
 
 Vue 2 的核心响应式系统基于 `Object.defineProperty`。下面通过一个完整的模拟实现，详细解释其原理。
 
-#### 4.1.1 核心概念
+#### 5.1.1 核心概念
 
 - **数据劫持**：将普通对象的属性转换为 `getter/setter`，在属性被访问或修改时执行额外逻辑。
 - **依赖收集**：当 `getter` 被调用时，记录当前正在执行的“观察者”（Watcher），建立属性与观察者的映射关系。
 - **派发更新**：当 `setter` 被调用时，通知所有依赖于该属性的观察者，触发更新。
 
-#### 4.1.2 简化版 Vue 响应式系统实现
+#### 5.1.2 简化版 Vue 响应式系统实现
 
 ```javascript
 // 1. 依赖管理器（Dep）
@@ -334,7 +355,7 @@ setTimeout(() => {
 }, 1000);
 ```
 
-#### 4.1.3 原理说明
+#### 5.1.3 原理说明
 
 1. **`observe` 函数**：递归遍历对象属性，为每个属性调用 `defineReactive`。
 2. **`defineReactive`**：使用 `Object.defineProperty` 重新定义属性。在 `get` 中调用 `dep.depend()` 收集当前活跃的 `Watcher`；在 `set` 中调用 `dep.notify()` 触发更新。
@@ -344,7 +365,7 @@ setTimeout(() => {
 
 这个简化模型揭示了 Vue 2 响应式系统的核心：**数据劫持 + 发布-订阅模式**。实际 Vue 源码中还处理了数组变异、计算属性、组件更新队列等复杂情况，但基本原理一致。
 
-### 4.2 创建只读属性
+### 5.2 创建只读属性
 
 通过设置 `writable: false` 和 `configurable: false` 可以创建不可修改、不可删除的常量属性。
 
@@ -359,7 +380,7 @@ obj.PI = 3.14; // 无效
 delete obj.PI; // 无效
 ```
 
-### 4.3 隐藏内部实现细节
+### 5.3 隐藏内部实现细节
 
 利用不可枚举属性隐藏辅助方法或内部状态，避免被外部遍历。
 
@@ -382,7 +403,7 @@ console.log(counter.value); // 5
 for (let k in counter) console.log(k); // 'increment', 'decrement'（没有 'value'）
 ```
 
-### 4.4 数据验证与日志
+### 5.4 数据验证与日志
 
 在 setter 中加入验证或日志逻辑。
 
@@ -403,7 +424,7 @@ user.age = 25; // 正常
 
 ---
 
-## 5. 与 Vue 3 的 Proxy 对比
+## 6. 与 Vue 3 的 Proxy 对比
 
 | 特性              | `Object.defineProperty` (Vue 2)                  | `Proxy` (Vue 3)                      |
 | ----------------- | ------------------------------------------------ | ------------------------------------ |
@@ -417,7 +438,7 @@ user.age = 25; // 正常
 
 ---
 
-## 6. 注意事项
+## 7. 注意事项
 
 - 使用 `defineProperty` 定义的属性，如果不指定 `enumerable`、`writable`、`configurable`，默认值均为 `false`。
 - 不能在同一属性上同时使用数据描述符（`value`/`writable`）和存取描述符（`get`/`set`）。
@@ -426,6 +447,6 @@ user.age = 25; // 正常
 
 ---
 
-## 7. 总结
+## 8. 总结
 
 `Object.defineProperty` 是 JavaScript 中精确控制对象属性的重要方法。它通过属性描述符允许开发者定义属性的读写行为、可枚举性、可配置性等。尽管在 Vue 3 中被 `Proxy` 取代，但它在需要细粒度控制属性、实现数据劫持、创建只读或隐藏属性等场景中仍然非常有用。理解其原理和限制，有助于编写更健壮的代码。
