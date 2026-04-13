@@ -2,7 +2,7 @@
 group:
   title: 【04】js对象及对象方法
   order: 4
-order: 15
+order: 30
 title: 构造函数
 nav:
   title: JavaScript
