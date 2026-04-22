@@ -1,0 +1,12 @@
+{
+  "name": "前端学习总结",
+  "description": "前端学习笔记",
+  "basePath": "auto",
+  "pages": [
+    {
+      "name": "首页",
+      "path": "/",
+      "description": "前端学习总结首页"
+    }
+  ]
+}

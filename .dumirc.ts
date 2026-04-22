@@ -3,24 +3,23 @@ import { defineThemeConfig } from 'dumi-theme-antd/dist/defineThemeConfig';
 
 // 判断是否为开发环境
 const isDev = process.env.NODE_ENV === 'development' || process.env.DUMI_ENV === 'devbuild';
+const basePath = process.env.BASE_PATH || (isDev ? '/' : '/zjh-blog/');
 
 export default defineConfig({
-  favicons: isDev ? ['/logo.ico'] : ['/zjh-blog/logo.ico'],
+  favicons: [`${basePath}logo.ico`],
   outputPath: 'dist',
-  history: {
-    type: 'browser',
-  },
-  base: isDev ? '/' : '/zjh-blog/',
-  publicPath: isDev ? '/' : '/zjh-blog/',
+  history: { type: 'browser' },
+  base: basePath,
+  publicPath: basePath,
   title: 'zjh-blog',
   themeConfig: defineThemeConfig({
     name: '❤️沐钦',
     title: '❤️沐钦',
-    logo: isDev ? '/logo.png' : '/zjh-blog/logo.png',
+    logo: `${basePath}logo.png`,
     description: '',
     socialLinks: {
       github: 'https://github.com/JHuaZhang/zjh-blog',
     },
-    footer: 'Copyright © 2025 zjh',
+    footer: 'Copyright © 2026 zjh',
   }),
 });
