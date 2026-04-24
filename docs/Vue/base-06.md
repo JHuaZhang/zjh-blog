@@ -2,7 +2,7 @@
 group:
   title: 【01】vue基础篇
   order: 1
-title: vue指令v-model
+title: vue指令v-model双向数据绑定
 order: 6
 nav:
   title: Vue
