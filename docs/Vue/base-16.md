@@ -147,22 +147,7 @@ watch: {
 
 **注意**：深度监听会递归遍历对象的所有属性，性能开销较大，建议仅在必要时使用。
 
-### 2.3 立即执行（immediate）
-
-如果希望组件初始化时立即执行一次回调，可以使用 `immediate: true`。
-
-```vue
-watch: {
-  searchText: {
-    handler(newVal) {
-      this.fetchData(newVal)
-    },
-    immediate: true   // 立即执行一次
-  }
-}
-```
-
-### 2.4 监听对象中的某个属性
+### 2.3 监听对象中的某个属性
 
 如果只需要监听对象中的某个具体属性，可以使用字符串路径形式：
 
@@ -179,7 +164,7 @@ watch: {
 
 这种方式比深度监听性能更好，推荐使用。
 
-### 2.5 监听多个数据源
+### 2.4 监听多个数据源
 
 可以使用数组形式同时监听多个数据，并在回调中统一处理（较少使用，通常使用计算属性或分别监听）。
 
@@ -198,9 +183,133 @@ watch: {
 
 ---
 
-## 3. watch 的高级用法
+## 3. watch 的完整语法：handler、deep、immediate
 
-### 3.1 监听路由变化
+在 `watch` 中，除了直接写函数外，还可以使用**对象形式**，该对象包含三个常用选项：`handler`（必需）、`deep`（可选）、`immediate`（可选）。对象形式提供了更精细的控制能力。
+
+### 3.1 handler——回调函数
+
+`handler` 是监听触发时实际执行的函数，它可以是一个函数名（字符串）或直接定义函数。
+
+**基本结构**：
+
+```javascript
+watch: {
+  someData: {
+    handler(newVal, oldVal) {
+      // 处理逻辑
+    },
+    deep: false,      // 默认 false
+    immediate: false   // 默认 false
+  }
+}
+```
+
+**两种定义方式**：
+
+1. **直接定义函数**（最常见）：
+   ```javascript
+   handler(newVal, oldVal) { /* ... */ }
+   ```
+
+2. **使用 methods 中定义的方法名**（字符串）：
+   ```javascript
+   handler: 'methodName'
+   ```
+   这种方式可以使回调逻辑复用，且代码更清晰。
+
+**示例**：
+
+```vue
+<template>
+  <div>
+    <input v-model="keyword" />
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return { keyword: '' }
+  },
+  watch: {
+    keyword: {
+      handler: 'debouncedSearch',  // 指向 methods 中的方法
+      immediate: true
+    }
+  },
+  methods: {
+    debouncedSearch(newVal, oldVal) {
+      console.log('搜索关键词变化：', oldVal, '->', newVal)
+      // 实际搜索逻辑...
+    }
+  }
+}
+</script>
+```
+
+### 3.2 deep——深度监听
+
+- **作用**：监听对象内部嵌套属性的变化（默认情况下，对象属性变化不会触发 `watch`）。
+- **使用场景**：需要监听整个对象或深层嵌套对象的变化时。
+- **性能注意**：`deep: true` 会递归遍历对象的所有属性并添加依赖，如果对象很深或很大会有性能损耗，应谨慎使用。
+
+**示例**：
+
+```javascript
+data() {
+  return {
+    user: { name: '张三', address: { city: '北京' } }
+  }
+},
+watch: {
+  user: {
+    handler(newVal) {
+      console.log('user 或其内部任何属性变化', newVal)
+    },
+    deep: true
+  }
+}
+```
+
+此时，修改 `user.name` 或 `user.address.city` 都会触发回调。
+
+### 3.3 immediate——立即执行
+
+- **作用**：在组件初始化时立即执行一次 `handler`，而不仅仅是等待数据变化。
+- **使用场景**：需要根据当前数据立即执行某些逻辑（如初始数据格式化、请求初始数据等）。
+
+**示例**：
+
+```javascript
+watch: {
+  userId: {
+    handler(newId) {
+      this.fetchUserData(newId)
+    },
+    immediate: true   // 组件创建时立即执行一次
+  }
+}
+```
+
+### 3.4 三种写法的对比与总结
+
+| 写法 | 语法 | 支持 deep | 支持 immediate | 适用场景 |
+|------|------|-----------|----------------|----------|
+| 函数简写 | `someData(newVal, oldVal) { ... }` | ❌ | ❌ | 简单监听，只需执行回调 |
+| 对象形式（无选项） | `someData: { handler() { ... } }` | ❌ | ❌ | 代码结构统一，但无特殊需求 |
+| 对象形式（含选项） | `someData: { handler, deep, immediate }` | ✅ | ✅ | 需要深度监听或立即执行 |
+
+**推荐做法**：
+- 当只需要执行一个简单回调时，使用函数简写（代码简洁）。
+- 当需要 `deep` 或 `immediate` 时，使用对象形式并配置相应选项。
+- 当回调逻辑复杂或需要复用时，可将 `handler` 指向 `methods` 中的方法名。
+
+---
+
+## 4. watch 的高级用法
+
+### 4.1 监听路由变化
 
 在 Vue 单页应用中，经常需要监听路由参数的变化来重新获取数据。
 
@@ -226,7 +335,7 @@ export default {
 </script>
 ```
 
-### 3.2 监听计算属性
+### 4.2 监听计算属性
 
 `watch` 不仅可以监听 `data` 中的属性，也可以监听 `computed` 计算属性。
 
@@ -253,7 +362,7 @@ export default {
 </script>
 ```
 
-### 3.3 监听多个属性并执行相同回调
+### 4.3 监听多个属性并执行相同回调
 
 如果需要监听多个属性，执行相同的操作，可以封装成一个方法，并在每个 watch 中调用。
 
@@ -303,7 +412,7 @@ watch: {
 
 ---
 
-## 4. watch 与 computed 的区别
+## 5. watch 与 computed 的区别
 
 | 特性 | computed | watch |
 |------|----------|-------|
@@ -320,7 +429,7 @@ watch: {
 
 ---
 
-## 5. watch 的原理简述
+## 6. watch 的原理简述
 
 `watch` 的实现基于 Vue 的响应式系统和 `Watcher` 类。每个 `watch` 都会创建一个用户自定义的 `Watcher` 实例。
 
@@ -363,11 +472,11 @@ Vue.prototype.$watch = function(expOrFn, cb, options) {
 
 ---
 
-## 6. 实例方法 `$watch` 详解
+## 7. 实例方法 `$watch` 详解
 
 除了在组件选项中使用 `watch`，Vue 还提供了**实例方法 `$watch`**，允许你动态地添加侦听器。`this.$watch` 是 Vue 实例上的一个方法，可以在任何地方（如 `mounted` 钩子、`methods` 中）调用，灵活控制监听的生命周期。
 
-### 6.1 为什么可以写 `this.$watch`？
+### 7.1 为什么可以写 `this.$watch`？
 
 `$watch` 是 Vue 实例的原型方法，在每个 Vue 组件实例上都可以直接调用。这得益于 Vue 在初始化实例时，会将 `$watch` 方法挂载到实例上，其内部访问了 Vue 的响应式系统。
 
@@ -376,7 +485,7 @@ Vue.prototype.$watch = function(expOrFn, cb, options) {
 - `$watch` 方法内部会创建一个 `Watcher` 对象，并将当前实例作为上下文，从而能够访问到实例的所有响应式属性。
 - 由于 JavaScript 的语言特性（原型链），`this.$watch` 可以被所有组件实例共享。
 
-### 6.2 `$watch` 的语法
+### 7.2 `$watch` 的语法
 
 ```javascript
 vm.$watch(expOrFn, callback, [options])
@@ -390,7 +499,7 @@ vm.$watch(expOrFn, callback, [options])
 
 返回值：**取消监听函数**，调用它即可停止监听。
 
-### 6.3 基本使用示例
+### 7.3 基本使用示例
 
 ```javascript
 export default {
@@ -412,7 +521,7 @@ export default {
 }
 ```
 
-### 6.4 监听函数（getter）形式
+### 7.4 监听函数（getter）形式
 
 第一个参数也可以是函数，用于监听复杂的计算表达式。
 
@@ -425,7 +534,7 @@ this.$watch(
 )
 ```
 
-### 6.5 深度监听与立即执行
+### 7.5 深度监听与立即执行
 
 ```javascript
 this.$watch('user', (newVal) => {
@@ -433,7 +542,7 @@ this.$watch('user', (newVal) => {
 }, { deep: true, immediate: true })
 ```
 
-### 6.6 为什么能这样写？原理深度剖析
+### 7.6 为什么能这样写？原理深度剖析
 
 当我们调用 `this.$watch` 时，Vue 内部会执行以下步骤：
 
@@ -445,22 +554,15 @@ this.$watch('user', (newVal) => {
 
 **关键点**：`$watch` 利用了 Vue 响应式系统的“发布-订阅”模式。每个响应式属性都拥有一个 `Dep`（依赖列表），当属性变化时，`Dep` 会通知所有订阅了它的 `Watcher`。`$watch` 创建的自定义 `Watcher` 就是订阅者之一。
 
-### 6.7 为什么不在 `data` 或 `computed` 中声明？
+### 7.7 实战示例：count 大于 5 时自动停止监听
 
-`$watch` 是一种**命令式**的监听方式，与 `watch` 选项的**声明式**不同。它的价值在于：
-- **动态添加/移除**：可以在运行时决定监听某个数据，并在不需要时精确停止。
-- **条件性监听**：只在特定条件下才开始监听。
-- **一次性监听**：实现类似 `$once` 的行为。
-- **灵活的回调逻辑**：可以在任意位置定义回调。
-
-### 6.8 完整示例：动态添加侦听器
+下面是一个具体场景：监听 `count` 的变化，每次变化时将 `currentWatchCount` 更新为 `count + 5`，当 `count > 5` 时自动断开监听。
 
 ```vue
 <template>
   <div>
-    <p>当前天气：{{ weather }}</p>
-    <button @click="startWatch">开始监听天气</button>
-    <button @click="stopWatch">停止监听</button>
+    <button @click="count++">点击给 count + 1</button>
+    <div>监听到了 count 的变化，当前 currentWatchCount 为 {{ currentWatchCount }}</div>
   </div>
 </template>
 
@@ -468,53 +570,49 @@ this.$watch('user', (newVal) => {
 export default {
   data() {
     return {
-      weather: '晴',
-      unwatchWeather: null
-    }
+      count: 0,
+      currentWatchCount: 0,
+      unwatch: null,   // 保存取消监听的函数
+    };
   },
-  methods: {
-    startWatch() {
-      if (this.unwatchWeather) return
-      this.unwatchWeather = this.$watch('weather', (newVal, oldVal) => {
-        console.log(`天气从 ${oldVal} 变为 ${newVal}`)
-        if (newVal === '雨') {
-          alert('下雨了，记得带伞！')
+  mounted() {
+    // 使用 $watch 动态创建监听，并保存取消函数
+    this.unwatch = this.$watch(
+      'count',
+      (newVal) => {
+        // 更新 currentWatchCount 为 count + 5
+        this.currentWatchCount = newVal + 5;
+
+        // 当 count 大于 5 时，断开监听
+        if (newVal > 5) {
+          this.unwatch();   // 调用取消函数停止监听
+          console.log('count 已大于 5，监听已断开');
         }
-      })
-    },
-    stopWatch() {
-      if (this.unwatchWeather) {
-        this.unwatchWeather()
-        this.unwatchWeather = null
-        console.log('已停止监听天气')
-      }
-    },
-    changeWeather() {
-      const weathers = ['晴', '阴', '雨', '雪']
-      const random = Math.floor(Math.random() * 4)
-      this.weather = weathers[random]
-    }
+      },
+      { immediate: true }   // 立即执行一次，让 currentWatchCount 初始化为 5
+    );
   },
   beforeDestroy() {
-    // 组件销毁前清理，避免内存泄漏
-    this.stopWatch()
-  }
-}
+    // 组件销毁前确保取消监听（可选，Vue 会自动清理，但手动取消是好习惯）
+    if (this.unwatch) {
+      this.unwatch();
+    }
+  },
+};
 </script>
 ```
 
-### 6.9 注意事项
-
-- **内存泄漏**：如果通过 `$watch` 创建了侦听器，但在组件销毁前没有取消，虽然 Vue 会自动清理，但为了避免在异步回调中引用已销毁的组件，建议在 `beforeDestroy` 中手动取消。
-- **箭头函数与 `this`**：回调中**不要使用箭头函数**，否则 `this` 不会指向组件实例。可以使用普通函数或解构。
-- **性能**：尽量不要创建大量不必要的 `$watch`，特别是在大型应用中。每个 `Watcher` 都会占用内存并参与依赖收集。
-- **与 `watch` 选项的区别**：`watch` 选项在组件初始化时创建，不能动态取消；`$watch` 更加灵活，但需要手动管理生命周期。
+**说明**：
+- 使用 `$watch` 获得取消函数 `unwatch`。
+- 在回调中更新 `currentWatchCount`，并判断 `newVal > 5` 时调用 `unwatch()` 停止监听。
+- 设置 `immediate: true` 以便组件初始化时立即执行一次，使 `currentWatchCount` 初始化为 `0 + 5 = 5`，与初始 `count=0` 保持一致。
+- 组件销毁前再次调用 `unwatch` 是防御性编程，虽然 Vue 会自动清理，但显式取消更安全。
 
 ---
 
-## 7. 注意事项与常见问题
+## 8. 注意事项与常见问题
 
-### 7.1 箭头函数问题
+### 8.1 箭头函数问题
 
 不要在 `watch` 回调中使用箭头函数，否则 `this` 不会指向 Vue 实例。
 
@@ -536,13 +634,13 @@ watch: {
 }
 ```
 
-### 7.2 深度监听的性能问题
+### 8.2 深度监听的性能问题
 
 `deep: true` 会递归遍历对象的所有属性并添加依赖，如果对象很大或嵌套很深，性能会显著下降。建议：
 - 尽量监听对象的特定属性，使用字符串路径。
 - 如果需要监听整个对象变化，考虑使用计算属性返回一个新对象，或手动序列化。
 
-### 7.3 监听数组的变化
+### 8.3 监听数组的变化
 
 Vue 能够检测到通过变异方法（`push`、`pop`、`shift`、`unshift`、`splice`、`sort`、`reverse`）修改数组，但对于直接通过索引修改或修改 `length` 属性，无法触发 `watch`。
 
@@ -567,7 +665,7 @@ watch: {
 }
 ```
 
-### 7.4 监听对象属性时 oldValue 的问题
+### 8.4 监听对象属性时 oldValue 的问题
 
 在深度监听对象时，`oldValue` 可能与 `newValue` 相同，因为它们是同一个对象的引用（对象内部属性变了但对象本身没变）。此时如果需要保留旧值的快照，需要手动深拷贝。
 
@@ -606,64 +704,16 @@ watch: {
 }
 ```
 
-### 7.5 停止监听（unwatch）示例
-
-使用 `$watch` 时，它会返回一个取消函数，调用该函数即可停止监听。下面是一个具体的例子：
-
-```vue
-<template>
-  <div>
-    <p>计数器：{{ count }}</p>
-    <button @click="count++">增加 count</button>
-    <button @click="stopCounting">停止监听 count</button>
-  </div>
-</template>
-
-<script>
-export default {
-  data() {
-    return {
-      count: 0,
-      unwatch: null
-    }
-  },
-  mounted() {
-    // 创建监听，并保存取消函数
-    this.unwatch = this.$watch('count', (newVal, oldVal) => {
-      console.log(`count 变化: ${oldVal} -> ${newVal}`)
-    })
-  },
-  methods: {
-    stopCounting() {
-      if (this.unwatch) {
-        this.unwatch()   // 调用取消函数，停止监听
-        console.log('已停止监听 count')
-      }
-    }
-  },
-  beforeDestroy() {
-    // 组件销毁前再次确保取消监听（可选，Vue 会自动清理，但手动取消是好的习惯）
-    if (this.unwatch) this.unwatch()
-  }
-}
-</script>
-```
-
-- 在 `mounted` 中通过 `this.$watch` 创建监听，`unwatch` 即为取消函数。
-- 点击“停止监听 count”按钮后，手动调用 `unwatch()`，后续 `count` 的变化将不再打印日志。
-- 组件销毁前也可以在 `beforeDestroy` 中再次调用，以防监听还未停止，但 Vue 会自动清理所有 `Watcher`，这不是必须的。
-
-对于通过 `watch` 选项定义（如 `watch: { count() {...} }`）的侦听器，无法手动停止，它们会随组件的销毁而自动销毁。
-
 ---
 
-## 8. 总结
+## 9. 总结
 
 - **`watch` 的作用**：监听响应式数据的变化，执行自定义逻辑（如异步请求、开销大的操作）。
 - **支持异步**：与 `computed` 不同，`watch` 可以在回调中执行异步代码。
-- **选项**：`deep`（深度监听）、`immediate`（立即执行）、`handler`（回调函数）。
+- **完整语法**：可以通过对象形式配置 `handler`、`deep`（深度监听）、`immediate`（立即执行）。
+- **三种写法**：函数简写（仅回调）、对象无选项、对象含选项，根据需求选择。
 - **适用场景**：异步操作、频繁变化时的控制（如防抖）、依赖多个数据变化执行相同操作、监听路由参数等。
 - **与 `computed` 的关系**：能用 `computed` 的优先用 `computed`，需要异步或副作用时用 `watch`。
 - **性能注意**：深度监听会消耗性能，尽量监听具体属性；避免使用箭头函数导致 `this` 错误。
 - **动态监听**：使用 `$watch` 实例方法可以灵活添加、取消侦听器，并支持函数形式的 getter。
-- **手动停止监听**：`$watch` 返回取消函数，通过调用它可精确控制监听的生命周期。`watch` 选项中定义的侦听器无法手动停止。
+- **手动停止监听**：`$watch` 返回取消函数，通过调用它可精确控制监听的生命周期。`watch` 选项中定义的侦听器无法手动停止，它们随组件销毁而销毁。
