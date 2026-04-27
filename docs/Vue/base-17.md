@@ -163,6 +163,102 @@ template: `
 
 如果因特殊原因必须使用普通引号，只能通过字符串拼接或转义字符 `\n` 实现，但可读性极差，不推荐。
 
+#### 2.1.8 ⚠️ 常见陷阱：runtime-only 构建版本不支持 `template` 选项
+
+##### 📌 问题现象
+
+在项目中使用 `Vue.component` 全局注册一个带有 `template` 选项的组件时，控制台报错：
+
+```
+[Vue warn]: You are using the runtime-only build of Vue where the template compiler is not available. Either pre-compile the templates into render functions, or use the compiler-included build.
+
+found in
+
+---> <MyBtn>
+       <App> at src/App.vue
+         <Root>
+```
+
+**示例代码**（main.js）：
+```javascript
+import Vue from 'vue'
+import App from './App.vue'
+
+Vue.config.productionTip = false
+
+// 全局注册一个使用 template 选项的组件
+Vue.component('my-btn', { template: '<button>点我</button>' })
+
+new Vue({
+  render: h => h(App),
+}).$mount('#app')
+```
+
+在 App.vue 的模板中使用了 `<my-btn />`，但页面上不显示按钮，控制台报上述错误。
+
+##### 🧠 根本原因
+
+Vue 有两种构建版本：
+
+- **runtime-only**（默认）：体积更小，但不包含模板编译器，无法将字符串模板（`template` 选项）编译为渲染函数。此版本要求所有模板必须预编译（如使用单文件组件的 `<template>` 或 `render` 函数）。
+- **compiler-included**（完整版）：包含模板编译器，支持 `template` 选项，但体积大约大 30%。
+
+通过 Vue CLI 创建的项目默认使用的是 **runtime-only** 版本，因此直接写 `{ template: '<button>点我</button>' }` 会报错。
+
+##### ✅ 解决方案
+
+**方案一：改用 `render` 函数（推荐）**
+
+```javascript
+Vue.component('my-btn', {
+  render(h) {
+    return h('button', '点我')
+  }
+})
+```
+
+`render` 函数不需要编译器，运行时直接生成虚拟节点，是官方推荐的高效写法。
+
+**方案二：使用单文件组件（SFC）**
+
+创建 `components/MyBtn.vue`：
+```vue
+<template>
+  <button>点我</button>
+</template>
+```
+
+在 `main.js` 中导入并注册：
+```javascript
+import MyBtn from './components/MyBtn.vue'
+Vue.component('my-btn', MyBtn)
+```
+
+单文件组件的 `<template>` 在构建时已经预编译成 `render` 函数，因此运行时不依赖编译器。
+
+**方案三：切换到完整版 Vue（不推荐，会增加打包体积）**
+
+在 `vue.config.js` 中添加：
+```javascript
+module.exports = {
+  runtimeCompiler: true
+}
+```
+然后重启项目。此选项会强制使用包含编译器的 Vue 版本，但会使最终打包体积增大。
+
+##### 📝 总结与最佳实践
+
+| 注册方式                                     | 是否需要编译器 | 适用场景                       |
+| -------------------------------------------- | -------------- | ------------------------------ |
+| `Vue.component('tag', { template: '...' })` | ✅ 需要        | 仅限完整版 Vue，不推荐现代项目 |
+| `Vue.component('tag', { render(h) {...} })` | ❌ 不需要      | 动态组件、高阶组件             |
+| 单文件组件（.vue）                           | ❌ 不需要      | **日常开发首选**               |
+
+**日常开发建议**：
+- 始终使用单文件组件（`.vue`），在 `<template>` 中编写模板。
+- 如果必须全局注册一个简单组件，使用 `render` 函数。
+- 避免在 runtime-only 环境下使用 `template` 选项，除非你明确切换到完整版。
+
 ### 2.2 注册组件
 
 注册组件就是让 Vue 知道组件构造器对应的标签名称，从而在模板中使用。注册方式分为**全局注册**和**局部注册**。
@@ -858,3 +954,4 @@ const app = new Vue({
 - **data 必须是函数**：确保每个组件实例拥有独立的数据作用域，避免数据污染。
 - **模板分离**：使用 `<template>` 标签定义模板内容，提高代码可维护性。
 - **`template` 字符串书写规范**：必须使用反引号（`）包裹多行模板，普通单引号或双引号不能直接换行。
+- **⚠️ runtime-only 构建限制**：默认 Vue CLI 项目不含模板编译器，如需使用 `{ template: '...' }` 注册组件，请改用 `render` 函数或单文件组件，否则会报错。
